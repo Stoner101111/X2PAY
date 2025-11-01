@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  burntober:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PUMP_API_KEY=${PUMP_API_KEY}
+      - SOLANA_PRIVATE_KEY=${SOLANA_PRIVATE_KEY}
+      - SOLANA_PUBLIC_KEY=${SOLANA_PUBLIC_KEY}
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+

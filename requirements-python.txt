@@ -1,0 +1,17 @@
+# x402 Hardware Bridge - Python Dependencies
+
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Bluetooth Low Energy
+bleak==0.21.0
+
+# Utilities
+asyncio
+typing-extensions==4.8.0
+
+# Optional: x402 client (if available)
+# x402-client==0.1.0
+
