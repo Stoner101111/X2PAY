@@ -10,6 +10,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/Node-18+-green.svg)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-blue.svg)](https://www.typescriptlang.org/)
+[![X (Twitter)](https://img.shields.io/badge/X-Twitter-black?logo=x&logoColor=white)](https://x.com/X2PAY_)
 
 </div>
 
@@ -233,6 +234,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 **Live Portal:** [X2PAY Portal](https://solana-trading-agent-adfhqau9w-idatorresm-8500s-projects.vercel.app)
 
+**Follow Us:** [X (Twitter)](https://x.com/X2PAY_)
+
+**GitHub:** [View Repository](https://github.com/Stoner101111/X2PAY)
+
 **Documentation:** See project docs folder
 
 ---
@@ -243,6 +248,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Made with ❤️ for the crypto community
 
-[⭐ Star us on GitHub](https://github.com/Stoner101111/X2PAY)
+[⭐ Star us on GitHub](https://github.com/Stoner101111/X2PAY) | [🐦 Follow on X](https://x.com/X2PAY_)
 
 </div>
