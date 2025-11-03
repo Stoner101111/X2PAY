@@ -102,19 +102,47 @@ export class TokenBurnService {
         }
       );
 
-      // Confirm transaction
-      const confirmation = await this.connection.confirmTransaction({
-        signature,
-        blockhash,
-        lastValidBlockHeight
-      }, 'confirmed');
+      // Confirm transaction (PRODUCTION: Wait for confirmation)
+      let confirmation;
+      try {
+        confirmation = await this.connection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight
+        }, 'confirmed');
+      } catch (confirmError: any) {
+        // If confirmation times out, check transaction status directly
+        console.warn(`⚠️ Confirmation timeout, checking transaction status...`);
+        const txStatus = await this.connection.getSignatureStatus(signature);
+        
+        if (txStatus.value && txStatus.value.err) {
+          throw new Error(`Transaction failed: ${JSON.stringify(txStatus.value.err)}`);
+        } else if (txStatus.value && !txStatus.value.err) {
+          // Transaction appears successful even if confirmation timed out
+          console.log(`✅ Transaction confirmed (verified via status check)`);
+        } else {
+          throw new Error(`Transaction status unknown - may be pending`);
+        }
+      }
 
-      if (confirmation.value.err) {
+      if (confirmation && confirmation.value.err) {
         throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
       }
 
       console.log(`✅ Successfully burned ${uiAmount} tokens!`);
       console.log(`🔥 Burn signature: ${signature}`);
+      console.log(`🔗 View on Solscan: https://solscan.io/tx/${signature}`);
+
+      // PRODUCTION CHECK: Verify balance decreased
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1s for state update
+      const verifyBalance = await this.getTokenBalance(tokenMintAddress);
+      
+      if (verifyBalance > 0) {
+        console.warn(`⚠️ Warning: Balance verification shows ${verifyBalance} tokens remaining`);
+        console.warn(`⚠️ This may be a state sync delay - transaction appears successful`);
+      } else {
+        console.log(`✅ Balance verified: All tokens burned (0 remaining)`);
+      }
 
       return {
         success: true,

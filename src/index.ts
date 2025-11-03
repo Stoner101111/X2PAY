@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
+import { PublicKey } from '@solana/web3.js';
 import { createPumpApiService, PumpApiService } from './pumpApi';
 import { createBurnService, TokenBurnService } from './burnService';
 import { createX402Service } from './services/x402Service';
@@ -331,75 +332,169 @@ app.post('/api/hardware/:deviceId/payment', async (req: Request, res: Response):
   }
 });
 
-// Auto-buy function WITH AUTOMATIC BURNING
+// Auto-buy function WITH AUTOMATIC BURNING (Production-Ready)
 async function performAutoBuy() {
   if (!pumpApi) {
     logger.error('Cannot perform auto-buy: Pump.fun API not configured');
     return;
   }
 
+  // PRODUCTION CHECK: Validate token mint address
+  if (!TOKEN_MINT_ADDRESS || TOKEN_MINT_ADDRESS.trim() === '') {
+    logger.error(`❌ TOKEN_MINT_ADDRESS not configured - cannot buy tokens!`);
+    logger.error(`Please set TOKEN_MINT_ADDRESS in your .env file`);
+    
+    // Stop auto-buy if token not configured to prevent spam errors
+    if (autoBuyInterval) {
+      clearInterval(autoBuyInterval);
+      autoBuyInterval = null;
+      logger.error('🛑 Auto-buy STOPPED due to missing TOKEN_MINT_ADDRESS');
+    }
+    return;
+  }
+
+  // PRODUCTION CHECK: Validate token mint address format (basic Solana public key check)
+  try {
+    new PublicKey(TOKEN_MINT_ADDRESS);
+  } catch (error) {
+    logger.error(`❌ Invalid TOKEN_MINT_ADDRESS format: ${TOKEN_MINT_ADDRESS}`);
+    logger.error('Token mint address must be a valid Solana public key');
+    return;
+  }
+
   try {
     lastBuyTime = Date.now(); // Update last buy time for countdown
-    logger.info(`🤖 Auto-buy: Attempting to buy ${AUTO_BUY_AMOUNT} SOL worth of tokens...`);
+    logger.info(`🤖 [AUTO-BUY] Starting buy cycle: ${AUTO_BUY_AMOUNT} SOL`);
     
-    // STEP 1: Collect any available creator fees
-    const collectResult = await pumpApi.collectCreatorFee(0.000001);
-    if (collectResult.success) {
-      logger.info(`💰 Collected creator fees: ${collectResult.txSignature}`);
+    // STEP 1: Collect any available creator fees (optional, won't fail if none available)
+    try {
+      const collectResult = await pumpApi.collectCreatorFee(0.000001);
+      if (collectResult.success) {
+        logger.info(`💰 [AUTO-BUY] Collected creator fees: ${collectResult.txSignature}`);
+      }
+    } catch (feeError: any) {
+      // Creator fee collection failure shouldn't stop the buy cycle
+      logger.warn(`⚠️ [AUTO-BUY] Could not collect creator fees: ${feeError.message}`);
     }
 
-    // STEP 2: Buy tokens (only if token mint is configured)
-    if (!TOKEN_MINT_ADDRESS) {
-      logger.error(`❌ TOKEN_MINT_ADDRESS not configured - cannot buy tokens!`);
-      logger.error(`Please set TOKEN_MINT_ADDRESS in your .env file`);
-      return;
-    }
-
+    // STEP 2: Buy tokens
+    logger.info(`🛒 [AUTO-BUY] Purchasing ${AUTO_BUY_AMOUNT} SOL worth of ${TOKEN_MINT_ADDRESS.substring(0, 8)}...`);
     const buyResult = await pumpApi.buyToken(TOKEN_MINT_ADDRESS, AUTO_BUY_AMOUNT, 0.000001);
     
-    if (buyResult.success) {
-      logger.info(`🛒 Auto-buy SUCCESS: ${AUTO_BUY_AMOUNT} SOL - Transaction: ${buyResult.txSignature}`);
-      logger.info(`🔥 Token: ${TOKEN_MINT_ADDRESS}`);
+    if (buyResult.success && buyResult.txSignature) {
+      logger.info(`✅ [AUTO-BUY] Purchase SUCCESS`);
+      logger.info(`📝 Transaction: ${buyResult.txSignature}`);
+      logger.info(`💵 Amount: ${AUTO_BUY_AMOUNT} SOL`);
+      logger.info(`🪙 Token: ${TOKEN_MINT_ADDRESS}`);
 
-      // STEP 3: BURN THE TOKENS! 🔥
+      // STEP 3: BURN THE TOKENS! 🔥 (Production critical)
       if (burnService) {
-        logger.info(`⏳ Waiting for tokens to arrive in wallet...`);
+        logger.info(`⏳ [BURN] Waiting for tokens to arrive in wallet (max 30s)...`);
         
         // Wait for tokens to appear (up to 30 seconds)
         const tokensArrived = await burnService.waitForTokens(TOKEN_MINT_ADDRESS, 30000);
         
         if (tokensArrived) {
-          logger.info(`🔥 BURNING tokens now...`);
-          const burnResult = await burnService.burnAllTokens(TOKEN_MINT_ADDRESS);
+          // PRODUCTION CHECK: Verify token balance before burning
+          const balanceBeforeBurn = await burnService.getTokenBalance(TOKEN_MINT_ADDRESS);
           
-          if (burnResult.success) {
-            logger.info(`🔥🔥🔥 BURN SUCCESS: ${burnResult.amountBurned} tokens DESTROYED!`);
-            logger.info(`🔥 Burn transaction: ${burnResult.signature}`);
-            logger.info(`✅ BUY → BURN CYCLE COMPLETE!`);
+          if (balanceBeforeBurn > 0) {
+            logger.info(`🔥 [BURN] Burning ${balanceBeforeBurn} tokens...`);
+            
+            // Retry logic for burn (max 3 attempts)
+            let burnAttempts = 0;
+            const maxBurnAttempts = 3;
+            let burnSuccess = false;
+            
+            while (burnAttempts < maxBurnAttempts && !burnSuccess) {
+              burnAttempts++;
+              logger.info(`🔥 [BURN] Attempt ${burnAttempts}/${maxBurnAttempts}...`);
+              
+              const burnResult = await burnService.burnAllTokens(TOKEN_MINT_ADDRESS);
+              
+              if (burnResult.success && burnResult.signature) {
+                burnSuccess = true;
+                logger.info(`🔥🔥🔥 [BURN] SUCCESS! ${burnResult.amountBurned} tokens DESTROYED!`);
+                logger.info(`📝 Burn Transaction: ${burnResult.signature}`);
+                logger.info(`✅ [CYCLE] BUY → BURN COMPLETE!`);
+                
+                // Verify tokens were actually burned
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s for confirmation
+                const balanceAfterBurn = await burnService.getTokenBalance(TOKEN_MINT_ADDRESS);
+                
+                if (balanceAfterBurn === 0) {
+                  logger.info(`✅ [BURN] Verified: Wallet balance is now 0 (tokens fully burned)`);
+                } else {
+                  logger.warn(`⚠️ [BURN] Warning: Wallet still has ${balanceAfterBurn} tokens - may need manual burn`);
+                }
+              } else {
+                logger.error(`❌ [BURN] Attempt ${burnAttempts} FAILED: ${burnResult.error}`);
+                if (burnAttempts < maxBurnAttempts) {
+                  logger.info(`🔄 [BURN] Retrying in 5 seconds...`);
+                  await new Promise(resolve => setTimeout(resolve, 5000));
+                }
+              }
+            }
+            
+            if (!burnSuccess) {
+              logger.error(`❌ [BURN] All ${maxBurnAttempts} burn attempts FAILED!`);
+              logger.error(`⚠️ Tokens may still be in wallet - manual intervention required`);
+            }
           } else {
-            logger.error(`❌ BURN FAILED: ${burnResult.error}`);
+            logger.warn(`⚠️ [BURN] No tokens found in wallet (balance: ${balanceBeforeBurn}) - skipping burn`);
           }
         } else {
-          logger.warn(`⚠️ Tokens did not arrive in time - skipping burn`);
+          logger.warn(`⚠️ [BURN] Tokens did not arrive within timeout - skipping burn`);
+          logger.warn(`⚠️ This may indicate a transaction delay - tokens will accumulate`);
         }
       } else {
-        logger.warn(`⚠️ Burn service not initialized - tokens will accumulate in wallet`);
+        logger.error(`❌ [BURN] Burn service not initialized!`);
+        logger.error(`⚠️ Tokens will accumulate in wallet - configure SOLANA_PRIVATE_KEY and SOLANA_RPC_URL`);
       }
     } else {
-      logger.error(`🛒 Auto-buy FAILED: ${buyResult.error}`);
+      logger.error(`❌ [AUTO-BUY] Purchase FAILED: ${buyResult.error || 'Unknown error'}`);
+      
+      // Log additional debugging info in development
+      if (!isProduction) {
+        logger.error(`Debug info: ${JSON.stringify(buyResult, null, 2)}`);
+      }
     }
   } catch (error: any) {
-    logger.error('Auto-buy error:', error);
+    logger.error(`❌ [AUTO-BUY] Fatal error: ${error.message}`);
+    logger.error(`Stack trace: ${error.stack}`);
+    
+    // Don't let errors crash the auto-buy cycle - continue trying
+    logger.info(`🔄 [AUTO-BUY] Will retry on next interval`);
   }
 }
 
-// Start auto-buy if enabled
-if (AUTO_BUY_ENABLED && pumpApi) {
-  logger.info('🚀 Starting auto-buy timer...');
-  autoBuyInterval = setInterval(performAutoBuy, AUTO_BUY_INTERVAL);
-  
-  // Perform initial buy after 5 seconds
-  setTimeout(performAutoBuy, 5000);
+// Start auto-buy if enabled (Production-ready validation)
+if (AUTO_BUY_ENABLED) {
+  if (!pumpApi) {
+    logger.error('❌ Auto-buy ENABLED but Pump.fun API not configured!');
+    logger.error('⚠️ Set PUMP_API_KEY, SOLANA_PUBLIC_KEY, and SOLANA_PRIVATE_KEY in .env');
+  } else if (!TOKEN_MINT_ADDRESS || TOKEN_MINT_ADDRESS.trim() === '') {
+    logger.error('❌ Auto-buy ENABLED but TOKEN_MINT_ADDRESS not configured!');
+    logger.error('⚠️ Set TOKEN_MINT_ADDRESS in .env file to enable auto-buy');
+  } else if (!burnService) {
+    logger.warn('⚠️ Auto-buy ENABLED but burn service not initialized!');
+    logger.warn('⚠️ Tokens will be purchased but NOT burned - set SOLANA_PRIVATE_KEY and SOLANA_RPC_URL');
+    logger.info('🚀 Starting auto-buy timer (WITHOUT burn capability)...');
+    autoBuyInterval = setInterval(performAutoBuy, AUTO_BUY_INTERVAL);
+    setTimeout(performAutoBuy, 5000);
+  } else {
+    logger.info('🚀 Starting PRODUCTION auto-buy timer (with burn)...');
+    logger.info(`⚙️ Configuration:`);
+    logger.info(`   - Buy Amount: ${AUTO_BUY_AMOUNT} SOL`);
+    logger.info(`   - Interval: ${AUTO_BUY_INTERVAL / 1000} seconds`);
+    logger.info(`   - Token: ${TOKEN_MINT_ADDRESS.substring(0, 16)}...`);
+    logger.info(`   - Burn: ✅ ENABLED`);
+    autoBuyInterval = setInterval(performAutoBuy, AUTO_BUY_INTERVAL);
+    
+    // Perform initial buy after 5 seconds
+    logger.info('⏰ Initial buy will execute in 5 seconds...');
+    setTimeout(performAutoBuy, 5000);
+  }
 }
 
 // Auto-buy control endpoints
