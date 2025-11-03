@@ -1,0 +1,33 @@
+﻿================================================================================
+  X2PAY - GitHub Upload Instructions
+================================================================================
+
+This folder contains all files needed to upload to GitHub.
+
+You can upload via:
+
+1. GITHUB WEBSITE (Easiest):
+   - Go to: https://github.com/Stoner101111/X2PAY
+   - Click "uploading an existing file"
+   - Drag entire X2PAY-GITHUB folder contents
+   - Commit changes
+
+2. GIT COMMAND LINE:
+   cd X2PAY-GITHUB
+   git init
+   git add .
+   git commit -m "Initial commit: X2PAY"
+   git remote add origin https://github.com/Stoner101111/X2PAY.git
+   git push -u origin main
+
+3. ZIP AND UPLOAD:
+   - Zip this entire folder
+   - Extract to your local machine
+   - Use GitHub CLI or desktop app to push
+
+================================================================================
+
+Your portal is already live at:
+https://solana-trading-agent-1jc2g5mgj-idatorresm-8500s-projects.vercel.app
+
+================================================================================
