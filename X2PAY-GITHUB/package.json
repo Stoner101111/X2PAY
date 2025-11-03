@@ -1,0 +1,58 @@
+{
+  "name": "solana-meme-coin-agent",
+  "version": "1.0.0",
+  "description": "Revolutionary machine-to-machine payments powered by x402 BLE protocol - Enable any device to autonomously monetize services through instant Bluetooth payments",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:prod": "cross-env NODE_ENV=production node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "watch": "ts-node --watch src/index.ts",
+    "test-api": "ts-node src/test-pump-api.ts",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "postbuild": "echo 'Build completed successfully'",
+    "health": "curl -f http://localhost:3000/health || exit 1"
+  },
+  "keywords": [
+    "solana",
+    "meme-coins",
+    "pump-fun",
+    "trading",
+    "agent",
+    "blockchain",
+    "x402",
+    "payments",
+    "usdc",
+    "crypto-payments"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@coinbase/x402": "^0.6.6",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "@types/bs58": "^4.0.4",
+    "axios": "^1.6.2",
+    "bs58": "^6.0.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "socket.io": "^4.7.4",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/ws": "^8.5.10",
+    "cross-env": "^7.0.3",
+    "rimraf": "^5.0.10",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

@@ -1,0 +1,46 @@
+================================================================================
+  ✅ COUNTDOWN TIMER ADDED!
+================================================================================
+
+30-second countdown for Dev Buy & Burn now live! 🎉
+
+--------------------------------------------------------------------------------
+🆕 NEW FEATURES:
+--------------------------------------------------------------------------------
+
+✓ Countdown Timer Section
+  - Large 48px timer display
+  - 30-second countdown
+  - Auto-reset every cycle
+  - Pulsing animation when ≤10s
+
+✓ Stats Display
+  - 0.02 SOL per buy
+  - 30s interval
+  - Visual indicators
+
+--------------------------------------------------------------------------------
+🌐 LIVE URL:
+--------------------------------------------------------------------------------
+
+Production: https://solana-trading-agent-adfhqau9w-idatorresm-8500s-projects.vercel.app
+
+Dashboard: https://vercel.com/idatorresm-8500s-projects/solana-trading-agent/pHn82Lb77zKmdnWtxNJ1WgomdWCZ
+
+--------------------------------------------------------------------------------
+🎯 VISUAL FEATURES:
+--------------------------------------------------------------------------------
+
+✓ Large lightning bolt icon
+✓ Monospace timer font
+✓ Primary blue color
+✓ Success green for interval
+✓ Smooth countdown animation
+✓ Card-based layout
+
+================================================================================
+
+Check your portal - countdown is live! ⏰
+
+================================================================================
+

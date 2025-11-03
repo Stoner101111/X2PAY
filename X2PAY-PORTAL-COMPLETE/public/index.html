@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X2PAY - Machine Economy Revolution | Autonomous IoT Monetization via BLE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0066FF;
+      --primary-dark: #0052CC;
+      --accent: #764BA2;
+      --bg: #0A0E27;
+      --surface: #141B33;
+      --surface-light: #1A2438;
+      --border: #2A3456;
+      --text: #E8EAF6;
+      --text-muted: #A8B2C8;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    
+    /* Background Pattern */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(0, 102, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(118, 75, 162, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* Header */
+    header {
+      background: rgba(20, 27, 51, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-weight: 700;
+      font-size: 24px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    
+    .nav-links a:hover {
+      color: var(--text);
+    }
+    
+    /* Hero Section */
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 80px 24px 60px;
+      text-align: center;
+    }
+    
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--text), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero .subtitle {
+      font-size: 20px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+    
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      font-family: inherit;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--surface-light);
+    }
+    
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    
+    .section {
+      margin-bottom: 60px;
+    }
+    
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text);
+    }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+    }
+    
+    .card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+    
+    .card-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    .card h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    
+    .card p {
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+    }
+    
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    /* Status Indicators */
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 14px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+    
+    .status-dot.online {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+    
+    /* Code Blocks */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+    
+    .code-block pre {
+      margin: 0;
+      color: var(--text);
+    }
+    
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 100px;
+      padding: 40px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    
+    footer .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    
+    footer .footer-links a:hover {
+      color: var(--text);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 40px;
+      }
+      
+      nav {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* Loading Animation */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .loading {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">X2PAY</div>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="#features">Features</a>
+        <a href="#demo">Demo</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="https://github.com/Stoner101111/X2PAY" target="_blank">GitHub</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <h1>Welcome To X2PAY</h1>
+    <p class="subtitle">
+      <strong>Where Every Device Becomes a Payment Gateway</strong><br>
+      Transform any IoT device into a self-sustaining revenue stream. Our revolutionary x402-over-BLE protocol 
+      enables autonomous monetization through instant USDC micropayments. Machines can now charge for services, 
+      data access, or compute time - completely unattended.
+    </p>
+    <div class="hero-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">
+        Launch App
+      </button>
+      <button class="btn btn-secondary" onclick="window.open('https://github.com/Stoner101111/X2PAY', '_blank')">
+        View on GitHub
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <!-- Dev Buy & Burn Countdown -->
+    <section id="dev-buy-burn" class="section">
+      <h2 class="section-title">🔥 Dev Buy & Burn Countdown</h2>
+      
+      <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <div style="padding: 40px;">
+          <div style="font-size: 64px; margin-bottom: 24px;">⚡</div>
+          <h3 style="font-size: 24px; margin-bottom: 16px;">Next Buy & Burn</h3>
+          <div style="font-size: 48px; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin: 24px 0; color: var(--primary);" id="burnCountdown">
+            00:30
+          </div>
+          <p style="color: var(--text-muted); margin-bottom: 24px;">
+            Supply reduction in progress
+          </p>
+          <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+            <div style="text-align: center;">
+              <div style="font-size: 32px; color: var(--primary); font-weight: 700;">0.02</div>
+              <div style="font-size: 14px; color: var(--text-muted);">SOL per buy</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 32px; color: var(--success); font-weight: 700;">30s</div>
+              <div style="font-size: 14px; color: var(--text-muted);">Interval</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+      <h2 class="section-title">How it works</h2>
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon">📡</div>
+          <h3>1) Broadcast</h3>
+          <p>ESP32 advertises over Bluetooth (BLE) using Nordic UART service UUID <code>6e400002-b5a3-f393-e0a9-e50e24dcca9e</code>.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔗</div>
+          <h3>2) Connect</h3>
+          <p>App scans for devices, connects via GATT, subscribes to TX characteristic for data transfer.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💬</div>
+          <h3>3) Exchange</h3>
+          <p>Device sends payment requirements JSON, app responds with signed transaction payload.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">✅</div>
+          <h3>4) Verify</h3>
+          <p>ESP32 sends payload to Coinbase facilitator API over WiFi, receives transaction hash confirmation.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="section">
+      <h2 class="section-title">Try it now</h2>
+      
+      <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <h3>Generate Payment Requirements</h3>
+        <p style="margin-bottom: 24px;">Configure your payment settings and generate x402 requirements JSON.</p>
+        
+        <div class="form-group">
+          <label>Network</label>
+          <select id="x402Network" class="form-control">
+            <option value="base-sepolia">Base Sepolia (Testnet)</option>
+            <option value="base">Base Mainnet</option>
+            <option value="avalanche-fuji">Avalanche Fuji (Testnet)</option>
+            <option value="avalanche">Avalanche Mainnet</option>
+            <option value="polygon-amoy">Polygon Amoy (Testnet)</option>
+            <option value="polygon">Polygon Mainnet</option>
+          </select>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div class="form-group">
+            <label>Payment Amount (USDC)</label>
+            <input type="text" id="x402Amount" class="form-control" value="1.00" placeholder="1.00">
+          </div>
+          <div class="form-group">
+            <label>Pay To Address</label>
+            <input type="text" id="x402PayTo" class="form-control" placeholder="0x...">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Description (Optional)</label>
+          <textarea id="x402Description" class="form-control" placeholder="Payment for services"></textarea>
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button class="btn btn-primary" onclick="generatePaymentRequirements()" style="flex: 1;">
+            Generate Payment Requirements
+          </button>
+          <button class="btn btn-secondary" onclick="clearX402Form()">
+            Clear
+          </button>
+        </div>
+        
+        <div id="x402Result" class="code-block" style="display: none;">
+          <pre id="x402RequirementsJson"></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bluetooth Scanner -->
+    <section class="section">
+      <h2 class="section-title">Bluetooth (BLE) Scanner</h2>
+      
+      <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <h3>Tap-to-Pay Device Scanner</h3>
+        <p style="margin-bottom: 24px;">Connect to nearby x402 payment devices via Web Bluetooth.</p>
+        
+        <div class="form-group">
+          <div class="status-indicator">
+            <div id="bleStatus" class="status-dot"></div>
+            <span id="bleStatusText">Ready to scan</span>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary" onclick="scanBluetoothDevices()" id="scanBtn" style="width: 100%;">
+          Scan for Devices
+        </button>
+        
+        <div id="bleDeviceInfo" style="display: none; margin-top: 24px; padding: 20px; background: var(--surface-light); border-radius: 8px; border: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <div class="status-dot online"></div>
+            <strong>Connected Device</strong>
+          </div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-muted);" id="deviceName"></div>
+          
+          <div style="margin-top: 16px; font-size: 14px; color: var(--text-muted);">
+            Payment info from device:
+          </div>
+          <div id="devicePaymentInfo" style="margin-top: 8px; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--primary);"></div>
+        </div>
+        
+        <div style="margin-top: 20px; padding: 16px; background: rgba(118, 75, 162, 0.1); border-radius: 8px; font-size: 13px; color: var(--text-muted);">
+          <strong>Note:</strong> Web Bluetooth API requires HTTPS or localhost. Compatible with Chrome, Edge, or Opera.
+        </div>
+      </div>
+    </section>
+
+    <!-- Hardware Bridge -->
+    <section class="section">
+      <h2 class="section-title">Hardware Bridge</h2>
+      
+      <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <h3>Python SDK Integration</h3>
+        <p style="margin-bottom: 24px;">Global HTTP API access to x402 Bluetooth devices for AI agents and automated systems.</p>
+        
+        <div class="form-group">
+          <div class="status-indicator">
+            <div id="bridgeStatus" class="status-dot"></div>
+            <span id="bridgeStatusText">Checking bridge...</span>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="checkBridgeStatus()">
+            Check Status
+          </button>
+          <button class="btn btn-secondary" onclick="discoverBridgeDevices()">
+            Discover Devices
+          </button>
+          <button class="btn btn-secondary" onclick="listBridgeDevices()">
+            List Connected
+          </button>
+        </div>
+        
+        <div id="bridgeInfo" style="display: none; margin-top: 24px; padding: 20px; background: var(--surface-light); border-radius: 8px; border: 1px solid var(--border);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <div class="status-dot online"></div>
+            <strong>Bridge Info</strong>
+          </div>
+          <div id="bridgeDetails" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://x402.org" target="_blank">x402 Protocol</a>
+      <a href="https://github.com/Stoner101111/X2PAY" target="_blank">GitHub</a>
+      <a href="/pricing.html">Pricing Strategy</a>
+      <a href="#features">Documentation</a>
+    </div>
+    <p>© 2024 X2PAY. All rights reserved. Built with ❤️ for the crypto community.</p>
+    <p style="margin-top: 12px; font-size: 13px; color: var(--text-muted);">
+      ESP32 • Bluetooth • x402 • Base Network
+    </p>
+  </footer>
+
+  <script>
+    // Web Bluetooth Configuration
+    const SERVICE_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+    const TX_CHAR_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+    const RX_CHAR_UUID = '6e400004-b5a3-f393-e0a9-e50e24dcca9e';
+    
+    let bleDevice = null;
+    let bleServer = null;
+    let bleService = null;
+    let bleRXChar = null;
+    let bleTXChar = null;
+
+    // x402 Payment Functions
+    async function generatePaymentRequirements() {
+      const network = document.getElementById('x402Network').value;
+      const amount = document.getElementById('x402Amount').value;
+      const payTo = document.getElementById('x402PayTo').value;
+      const description = document.getElementById('x402Description').value;
+
+      if (!network || !amount || !payTo) {
+        alert('Please fill in Network, Amount, and Pay To address');
+        return;
+      }
+
+      try {
+        const r = await fetch('/api/x402/requirements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ network, amount, payTo, description })
+        });
+        const d = await r.json();
+        
+        if (d.success) {
+          document.getElementById('x402RequirementsJson').textContent = JSON.stringify(d.requirements, null, 2);
+          document.getElementById('x402Result').style.display = 'block';
+        } else {
+          alert('Failed: ' + d.error);
+        }
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    function clearX402Form() {
+      document.getElementById('x402Network').value = 'base-sepolia';
+      document.getElementById('x402Amount').value = '1.00';
+      document.getElementById('x402PayTo').value = '';
+      document.getElementById('x402Description').value = '';
+      document.getElementById('x402Result').style.display = 'none';
+    }
+
+    // Web Bluetooth Functions
+    async function scanBluetoothDevices() {
+      if (!navigator.bluetooth) {
+        alert('Web Bluetooth is not supported in this browser. Please use Chrome, Edge, or Opera.');
+        return;
+      }
+
+      const btn = document.getElementById('scanBtn');
+      btn.disabled = true;
+      btn.textContent = 'Scanning...';
+
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: [SERVICE_UUID] }],
+          optionalServices: [SERVICE_UUID],
+        });
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        const rx = await service.getCharacteristic(RX_CHAR_UUID);
+        const tx = await service.getCharacteristic(TX_CHAR_UUID);
+
+        await tx.startNotifications();
+        tx.addEventListener('characteristicvaluechanged', (event) => {
+          handleBLENotification(event);
+        });
+
+        bleDevice = device;
+        bleServer = server;
+        bleService = service;
+        bleRXChar = rx;
+        bleTXChar = tx;
+        
+        document.getElementById('bleStatus').classList.add('online');
+        document.getElementById('bleStatusText').textContent = 'Connected';
+        document.getElementById('deviceName').textContent = device.name || 'Unknown Device';
+        document.getElementById('bleDeviceInfo').style.display = 'block';
+        
+        await fetchDeviceData();
+        
+      } catch (error) {
+        console.error('Bluetooth error:', error);
+        if (error.name !== 'NotFoundError') {
+          alert('Error connecting to device: ' + error.message);
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Scan for Devices';
+      }
+    }
+
+    async function fetchDeviceData() {
+      if (!bleRXChar) return;
+      await sendBLEData('[LOGO]');
+      await delay(200);
+      await sendBLEData('[CONFIG]');
+    }
+
+    async function sendBLEData(data) {
+      if (!bleRXChar) return;
+      try {
+        const encoder = new TextEncoder();
+        await bleRXChar.writeValue(encoder.encode(data));
+        await delay(10);
+      } catch (error) {
+        console.error('Error sending data:', error);
+      }
+    }
+
+    function handleBLENotification(event) {
+      const value = event.target.value;
+      const decoder = new TextDecoder('utf-8');
+      const text = decoder.decode(value);
+      
+      if (text.startsWith('402://')) {
+        const data = JSON.parse(text.slice(6));
+        document.getElementById('devicePaymentInfo').innerHTML = `
+          Network: ${data.network}<br>
+          Price: ${data.price} USDC
+        `;
+      }
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Hardware Bridge Functions
+    async function checkBridgeStatus() {
+      try {
+        const r = await fetch('/api/hardware/bridge-status');
+        const d = await r.json();
+        
+        if (d.status === 'operational') {
+          document.getElementById('bridgeStatus').classList.add('online');
+          document.getElementById('bridgeStatusText').textContent = 'Bridge operational';
+          document.getElementById('bridgeInfo').style.display = 'block';
+          document.getElementById('bridgeDetails').innerHTML = `
+            Devices: ${d.devices_connected}<br>
+            Version: ${d.version}
+          `;
+        } else {
+          document.getElementById('bridgeStatusText').textContent = 'Bridge unavailable';
+        }
+      } catch (e) {
+        document.getElementById('bridgeStatusText').textContent = 'Bridge not running';
+      }
+    }
+
+    async function discoverBridgeDevices() {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = 'Scanning...';
+      
+      try {
+        const r = await fetch('/api/hardware/discover', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({duration: 5})
+        });
+        const d = await r.json();
+        
+        if (d.success) {
+          alert(`Found ${d.count} x402 devices`);
+        }
+      } catch (e) {
+        alert('Discovery failed');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Discover Devices';
+      }
+    }
+
+    async function listBridgeDevices() {
+      try {
+        const r = await fetch('/api/hardware/devices');
+        const d = await r.json();
+        
+        if (d.success) {
+          document.getElementById('bridgeInfo').style.display = 'block';
+          document.getElementById('bridgeDetails').textContent = `Connected: ${d.count} device(s)`;
+        }
+      } catch (e) {
+        alert('Failed to list devices');
+      }
+    }
+
+    // Dev Buy & Burn Countdown Timer
+    let burnCountdownInterval = null;
+    let burnTimeRemaining = 30; // 30 seconds
+
+    function startBurnCountdown() {
+      if (burnCountdownInterval) {
+        clearInterval(burnCountdownInterval);
+      }
+      
+      burnTimeRemaining = 30;
+      updateBurnCountdown();
+      
+      burnCountdownInterval = setInterval(() => {
+        burnTimeRemaining--;
+        updateBurnCountdown();
+        
+        if (burnTimeRemaining <= 0) {
+          burnTimeRemaining = 30; // Reset to 30 seconds
+        }
+      }, 1000);
+    }
+
+    function updateBurnCountdown() {
+      const element = document.getElementById('burnCountdown');
+      if (element) {
+        const minutes = Math.floor(burnTimeRemaining / 60);
+        const seconds = burnTimeRemaining % 60;
+        element.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        // Add pulsing effect when time is low
+        if (burnTimeRemaining <= 10) {
+          element.style.animation = 'pulse 1s infinite';
+        } else {
+          element.style.animation = 'none';
+        }
+      }
+    }
+
+    // Initialize countdown on page load
+    startBurnCountdown();
+
+    // Initialize
+    if (!navigator.bluetooth) {
+      console.warn('Web Bluetooth not supported');
+    }
+  </script>
+</body>
+</html>

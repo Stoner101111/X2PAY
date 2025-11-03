@@ -1,0 +1,92 @@
+================================================================================
+  🌍 HOW TO PUBLISH YOUR PORTAL TO THE WEB
+================================================================================
+
+Your x4Pay portal is READY to go live!
+
+--------------------------------------------------------------------------------
+⚡ FASTEST METHOD: Vercel (Recommended)
+--------------------------------------------------------------------------------
+
+Open PowerShell and run:
+
+  npm install -g vercel
+  vercel
+
+Then follow the prompts:
+  → Set up and deploy? (Y/n) → Y
+  → Which scope? → Your account
+  → Link to existing? (y/N) → N
+  → Project name? → x4pay-portal
+  → Override settings? (y/N) → N
+
+Done! Your portal will be at: https://x4pay-portal.vercel.app
+
+--------------------------------------------------------------------------------
+📋 WHAT HAPPENS
+--------------------------------------------------------------------------------
+
+✓ Vercel uploads your code
+✓ Builds your portal
+✓ Deploys globally
+✓ Provides HTTPS URL
+✓ Auto-updates on git push
+
+Total time: 2 minutes!
+
+--------------------------------------------------------------------------------
+🌐 OTHER PLATFORMS
+--------------------------------------------------------------------------------
+
+NETLIFY:
+  npm install -g netlify-cli
+  netlify login
+  netlify deploy --prod
+
+RENDER / RAILWAY:
+  Visit render.com or railway.app
+  Connect your GitHub repo
+  Click deploy
+
+All free tiers available!
+
+--------------------------------------------------------------------------------
+📁 FILES READY
+--------------------------------------------------------------------------------
+
+✓ vercel.json
+✓ netlify.toml
+✓ Dockerfile
+✓ dist/ (compiled code)
+✓ public/ (static files)
+✓ BUILD SUCCESSFUL
+
+--------------------------------------------------------------------------------
+✅ CHECKLIST
+--------------------------------------------------------------------------------
+
+Before deploying:
+  ✓ Code compiles
+  ✓ Build successful
+  ✓ Portal works locally
+  ✓ All files ready
+
+To deploy:
+  ✓ Install Vercel CLI
+  ✓ Run: vercel
+  ✓ Get your URL
+  ✓ Share with world!
+
+--------------------------------------------------------------------------------
+🚀 START NOW
+--------------------------------------------------------------------------------
+
+Copy this into PowerShell:
+
+  npm install -g vercel
+  vercel
+
+Your portal will be LIVE in 2 minutes! 🎉
+
+================================================================================
+

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>x402 Pricing Strategy - Payments for Machines</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+    .header p {
+      font-size: 18px;
+      color: #6b7280;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .tab {
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+    .tab:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .tab.active {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+    }
+    .tab-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .tab h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tab p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .content {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .content h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 16px;
+    }
+    .pros {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .pro {
+      background: #d1fae5;
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: start;
+      gap: 12px;
+    }
+    .pro-icon {
+      color: #059669;
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .pro-text {
+      font-size: 14px;
+      color: #065f46;
+    }
+    .tiers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .tier {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s;
+    }
+    .tier:hover {
+      border-color: #6366f1;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    .tier-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+    .tier-price {
+      font-size: 36px;
+      font-weight: 700;
+      color: #6366f1;
+      margin-bottom: 20px;
+    }
+    .tier-features {
+      list-style: none;
+    }
+    .tier-features li {
+      display: flex;
+      align-items: start;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #4b5563;
+    }
+    .tier-features li:before {
+      content: '→';
+      color: #6366f1;
+      font-weight: bold;
+    }
+    .segments {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .segment {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .segment:hover {
+      border-color: #6366f1;
+    }
+    .segment.active {
+      background: #ede9fe;
+      border-color: #6366f1;
+    }
+    .segment h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 8px;
+    }
+    .segment p {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .recommendation {
+      background: #ede9fe;
+      border: 2px solid #a78bfa;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .recommendation h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #6d28d9;
+      margin-bottom: 8px;
+    }
+    .recommendation p {
+      font-size: 14px;
+      color: #5b21b6;
+    }
+    .strategy {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 32px;
+      color: white;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .strategy h2 {
+      color: white;
+      margin-bottom: 24px;
+    }
+    .strategy-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .phase {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .phase h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .phase ul {
+      list-style: none;
+    }
+    .phase li {
+      font-size: 14px;
+      margin-bottom: 8px;
+      opacity: 0.95;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 24px;
+      opacity: 0.9;
+      transition: opacity 0.3s;
+    }
+    .back-link:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">← Back to Portal</a>
+    
+    <div class="header">
+      <h1>⚡ x402 Payment Protocol</h1>
+      <p>Pricing Strategy Tool for IoT Payments via BLE</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-model="freemium" onclick="selectModel('freemium')">
+        <div class="tab-icon">⚡</div>
+        <h3>Freemium (Recommended)</h3>
+        <p>Free Arduino libraries + Premium features</p>
+      </div>
+      <div class="tab" data-model="transaction" onclick="selectModel('transaction')">
+        <div class="tab-icon">📈</div>
+        <h3>Transaction Fee Model</h3>
+        <p>Charge a small % per payment processed</p>
+      </div>
+      <div class="tab" data-model="hybrid" onclick="selectModel('hybrid')">
+        <div class="tab-icon">💰</div>
+        <h3>Hybrid Model</h3>
+        <p>Low monthly fee + small transaction fee</p>
+      </div>
+    </div>
+
+    <div class="content" id="modelContent">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+
+    <div class="content">
+      <h2>👥 Target Customer Segments</h2>
+      <div class="segments">
+        <div class="segment active" data-segment="hobbyist" onclick="selectSegment('hobbyist')">
+          <h4>Hobbyists & Makers</h4>
+          <p><strong>Willingness:</strong> Low ($0-20/mo)</p>
+          <p><strong>Volume:</strong> 1-10 devices</p>
+        </div>
+        <div class="segment" data-segment="startup" onclick="selectSegment('startup')">
+          <h4>IoT Startups</h4>
+          <p><strong>Willingness:</strong> Medium ($50-500/mo)</p>
+          <p><strong>Volume:</strong> 10-1,000 devices</p>
+        </div>
+        <div class="segment" data-segment="enterprise" onclick="selectSegment('enterprise')">
+          <h4>Enterprise IoT</h4>
+          <p><strong>Willingness:</strong> High ($1k-10k+/mo)</p>
+          <p><strong>Volume:</strong> 1,000+ devices</p>
+        </div>
+      </div>
+      <div class="recommendation">
+        <h4>Recommendation:</h4>
+        <p id="segmentRecommendation">Target with free tier, monetize through donations or premium templates</p>
+      </div>
+    </div>
+
+    <div class="strategy">
+      <h2>Strategic Recommendations for x402</h2>
+      <div class="strategy-grid">
+        <div class="phase">
+          <h3>Phase 1: Adoption (Months 1-6)</h3>
+          <ul>
+            <li>• Keep core libraries 100% free and open source</li>
+            <li>• Focus on developer experience and documentation</li>
+            <li>• Build community through Discord/GitHub</li>
+            <li>• Showcase use cases and demos</li>
+          </ul>
+        </div>
+        <div class="phase">
+          <h3>Phase 2: Monetization (Months 6-12)</h3>
+          <ul>
+            <li>• Launch premium dashboard and analytics</li>
+            <li>• Introduce transaction fees (0.5% standard)</li>
+            <li>• Offer commercial licenses for enterprises</li>
+            <li>• Provide white-label options</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pricingModels = {
+      freemium: {
+        pros: [
+          "Fast adoption by developers & makers",
+          "Network effects - more devices = more value",
+          "Easy to test and integrate"
+        ],
+        structure: [
+          { tier: "Free (Open Source)", price: "$0", features: ["Core x402 protocol libraries", "Basic BLE payment acceptance", "Community support", "GitHub documentation"] },
+          { tier: "Developer", price: "$29/mo", features: ["Advanced analytics dashboard", "Priority support", "Custom branding options", "Webhook integrations"] },
+          { tier: "Commercial", price: "$299/mo", features: ["Unlimited devices", "SLA guarantees", "White-label solution", "Custom contract terms"] }
+        ]
+      },
+      transaction: {
+        pros: [
+          "Scales with customer success",
+          "Low barrier to entry",
+          "Predictable revenue as network grows"
+        ],
+        structure: [
+          { tier: "Standard", price: "0.5% per tx", features: ["No monthly fees", "Process unlimited payments", "Basic dashboard", "Email support"] },
+          { tier: "Volume", price: "0.3% per tx", features: ["$10k+ monthly volume", "Priority processing", "Advanced analytics", "API access"] },
+          { tier: "Enterprise", price: "0.1% per tx", features: ["$100k+ monthly volume", "Dedicated account manager", "Custom integrations", "24/7 support"] }
+        ]
+      },
+      hybrid: {
+        pros: [
+          "Predictable base revenue",
+          "Aligned incentives with customers",
+          "Captures both small & large users"
+        ],
+        structure: [
+          { tier: "Starter", price: "$9/mo + 0.8% tx", features: ["Up to 100 devices", "Basic features", "Community support", "Monthly usage reports"] },
+          { tier: "Professional", price: "$49/mo + 0.5% tx", features: ["Up to 1,000 devices", "Advanced features", "Priority support", "Real-time analytics"] },
+          { tier: "Enterprise", price: "$299/mo + 0.2% tx", features: ["Unlimited devices", "All features", "Dedicated support", "Custom development"] }
+        ]
+      }
+    };
+
+    const segments = {
+      hobbyist: "Target with free tier, monetize through donations or premium templates",
+      startup: "Transaction or hybrid model works best - scales with their growth",
+      enterprise: "Custom contracts with volume discounts and SLAs"
+    };
+
+    let selectedModel = 'freemium';
+    let selectedSegment = 'hobbyist';
+
+    function selectModel(model) {
+      selectedModel = model;
+      
+      // Update tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelector(`[data-model="${model}"]`).classList.add('active');
+
+      // Update content
+      renderModel();
+    }
+
+    function selectSegment(segment) {
+      selectedSegment = segment;
+      
+      // Update segments
+      document.querySelectorAll('.segment').forEach(s => {
+        s.classList.remove('active');
+      });
+      document.querySelector(`[data-segment="${segment}"]`).classList.add('active');
+
+      // Update recommendation
+      document.getElementById('segmentRecommendation').textContent = segments[segment];
+    }
+
+    function renderModel() {
+      const model = pricingModels[selectedModel];
+      const html = `
+        <div class="pros">
+          ${model.pros.map(pro => `
+            <div class="pro">
+              <span class="pro-icon">✓</span>
+              <span class="pro-text">${pro}</span>
+            </div>
+          `).join('')}
+        </div>
+        <h3 class="tier-name">Pricing Tiers:</h3>
+        <div class="tiers">
+          ${model.structure.map(tier => `
+            <div class="tier">
+              <h4 class="tier-name">${tier.tier}</h4>
+              <div class="tier-price">${tier.price}</div>
+              <ul class="tier-features">
+                ${tier.features.map(f => `<li>${f}</li>`).join('')}
+              </ul>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      document.getElementById('modelContent').innerHTML = html;
+    }
+
+    // Initial render
+    renderModel();
+  </script>
+</body>
+</html>
+

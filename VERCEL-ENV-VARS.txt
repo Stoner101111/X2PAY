@@ -1,0 +1,52 @@
+================================================================================
+  🔐 ADD THESE ENVIRONMENT VARIABLES TO VERCEL
+================================================================================
+
+Go to: https://vercel.com/idatorresm-8500s-projects/solana-trading-agent/settings/environment-variables
+
+Add these environment variables:
+
+--------------------------------------------------------------------------------
+CREDENTIALS:
+--------------------------------------------------------------------------------
+
+SOLANA_PUBLIC_KEY
+4BLLfDnAkZ5dk63d6GE2ShY9QEof9vrXyWZe7nTeMdH4
+
+SOLANA_PRIVATE_KEY
+2X8TPTbgdoQGZ662eUP8bZZB36TuL7SGaSWYdhCUjBvCSgzq2WcDU1Ma3mgf55PpYLKzAZFG6qZ2ephvCG7aNZkE
+
+PUMP_API_KEY
+65m7ad3tah46ckbm8xrnaru16rqpmxhhc5272cbm8n43aubpen3k8v285dv32wk6758q0x3eatwk6rkmamrpahu4a1wmcm369dk5ehjmdth7egu4d596rha3cnq4we2e8d36cthgcwykua1d4wgvq95tmac2f61c4phaeagax53ahbc9hvngjkd912pwvu2dwrqckkae58kuf8
+
+SOLANA_RPC_URL
+https://api.mainnet-beta.solana.com
+
+AUTO_BUY_ENABLED
+true
+
+AUTO_BUY_AMOUNT
+0.02
+
+AUTO_BUY_INTERVAL
+30000
+
+NODE_ENV
+production
+
+--------------------------------------------------------------------------------
+SETUP INSTRUCTIONS:
+--------------------------------------------------------------------------------
+
+1. Visit Vercel dashboard
+2. Go to Settings > Environment Variables
+3. Add each variable above
+4. Click "Save"
+5. Redeploy: vercel --prod
+
+================================================================================
+
+AFTAER ADDING THESE, YOUR PORTAL WILL HAVE FULL FUNCTIONALITY!
+
+================================================================================
+

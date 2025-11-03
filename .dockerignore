@@ -1,0 +1,29 @@
+﻿# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Development files
+.git/
+.gitignore
+README.md
+.vscode/
+.idea/
+
+# Testing
+coverage/
+.nyc_output/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts not needed in image
+dist/
