@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>x402 Payments for Machines - Complete Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070511;
+      --panel: rgba(12, 10, 24, 0.65);
+      --muted: #9aa3b2;
+      --text: #f5f7ff;
+      --accent: #7dd3fc; /* sky */
+      --accent-2: #c084fc; /* violet */
+      --ok: #34d399;
+      --warn: #fbbf24;
+      --err: #f87171;
+      --border: rgba(148,163,184,0.18);
+      --glow: 0 0 0 transparent, 0 0 26px rgba(192, 132, 252, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      color: var(--text);
+      background: var(--bg);
+    }
+    /* full-screen image background */
+    body::before {
+      content: "";
+      position: fixed; inset: 0; z-index: -3;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      filter: saturate(110%) contrast(105%);
+    }
+    /* soft color wash over image */
+    body::after {
+      content: "";
+      position: fixed; inset: 0; z-index: -2;
+      background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(192,132,252,0.16), transparent 55%),
+        radial-gradient(1000px 700px at 90% 0%, rgba(125,211,252,0.14), transparent 60%),
+        linear-gradient(180deg, rgba(7,5,17,0.35), rgba(7,5,17,0.55));
+      pointer-events: none;
+    }
+    .wrap {
+      min-height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    /* full-screen animated canvases */
+    #galaxy {
+      position: fixed; inset: 0; z-index: -1; display:block;
+    }
+    #swirl {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none; display:block;
+    }
+    header {
+      position: sticky; top: 0;
+      backdrop-filter: saturate(140%) blur(8px);
+      background: rgba(11,13,16,0.6);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+    .nav {
+      max-width: 900px; margin: 0 auto; padding: 16px 20px;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px; text-decoration: none;
+      color: var(--text);
+    }
+    .title {
+      font-weight: 800; letter-spacing: 0.6px; font-size: 22px;
+    }
+    main { padding: 24px 16px; }
+    .container {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr; gap: 16px;
+    }
+    .panel {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 18px 16px;
+      box-shadow: 0 0 0 transparent, 0 0 42px rgba(124,58,237,0.12);
+    }
+    .panel h2 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+    .hero {
+      display: grid; grid-auto-rows: auto; gap: 12px; min-height: auto;
+    }
+    .hero-title {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 700; font-size: 24px; letter-spacing: 0.6px;
+      display: inline-flex; align-items: center; gap: 10px;
+    }
+    .cursor { width: 10px; height: 18px; background: linear-gradient(180deg,var(--accent),var(--accent-2)); display: inline-block; animation: blink 1s steps(1) infinite; border-radius: 2px; box-shadow: 0 0 18px rgba(124,58,237,0.45); }
+    @keyframes blink { 50% { opacity: 0; } }
+    .hero-sub { color: var(--muted); font-size: 13px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .metric { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .metric .v { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 18px; font-weight: 700; }
+    .metric .l { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .btn {
+      appearance: none; border: 1px solid var(--border); color: var(--text);
+      background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 12px;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.3px; cursor: pointer; width: 100%;
+      transition: transform .12s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(192,132,252,0.55); box-shadow: 0 0 0 3px rgba(192,132,252,0.12) inset; }
+    .btn.primary { border-color: rgba(125,211,252,0.6); background: linear-gradient(180deg, rgba(125,211,252,0.18), rgba(125,211,252,0.06)); }
+    .footer { max-width: 1100px; margin: 0 auto; padding: 14px 20px; color: var(--muted); border-top: 1px solid var(--border); font-size: 12px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .field { display: grid; gap: 6px; }
+    .label { color: var(--muted); font-size: 12px; }
+    .input, .textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.02); color: var(--text); outline: none;
+      font-size: 13px; font-family: Inter, system-ui;
+    }
+    .textarea { min-height: 92px; resize: vertical; }
+  </style>
+</head>
+<body>
+  <canvas id="galaxy"></canvas>
+  <canvas id="swirl"></canvas>
+  <div class="wrap">
+    <header>
+      <div class="nav">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <a class="brand" href="/">
+              <div class="title">🚀 x402 Payments for Machines</div>
+            </a>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size:12px; color:var(--muted)">tap://to/pay</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <section class="panel hero" style="backdrop-filter: blur(4px) saturate(120%);">
+          <h1 class="hero-title">x402 Payment Portal<span class="cursor"></span></h1>
+          <div class="hero-sub">Accept USDC payments across multiple blockchains using x402 protocol. Tap to pay with Bluetooth support.</div>
+        </section>
+
+        <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
+          <h2>💳 Generate Payment Requirements</h2>
+          <div class="hero-sub" style="margin-bottom: 16px;">
+            Create payment requirements for accepting x402 payments. Configure network, amount, and recipient address.
+          </div>
+          <div class="row">
+            <div class="field">
+              <div class="label">Network</div>
+              <select class="input" id="x402Network">
+                <option value="base-sepolia">Base Sepolia (Testnet)</option>
+                <option value="base">Base Mainnet</option>
+                <option value="avalanche-fuji">Avalanche Fuji (Testnet)</option>
+                <option value="avalanche">Avalanche Mainnet</option>
+                <option value="polygon-amoy">Polygon Amoy (Testnet)</option>
+                <option value="polygon">Polygon Mainnet</option>
+                <option value="sei-testnet">Sei Testnet</option>
+                <option value="sei">Sei Mainnet</option>
+                <option value="iotex">IoTeX</option>
+                <option value="peaq">Peaq</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="label">Payment Amount (USDC)</div>
+              <input class="input" id="x402Amount" type="text" placeholder="1.00" value="1.00" />
+            </div>
+          </div>
+          <div class="field" style="margin-top: 10px;">
+            <div class="label">Pay To Address</div>
+            <input class="input" id="x402PayTo" type="text" placeholder="0x..." />
+          </div>
+          <div class="field" style="margin-top: 10px;">
+            <div class="label">Description (Optional)</div>
+            <textarea class="textarea" id="x402Description" placeholder="Payment for services"></textarea>
+          </div>
+          <div class="actions" style="margin-top: 16px;">
+            <button class="btn primary" onclick="generatePaymentRequirements()">Generate Payment Requirements</button>
+            <button class="btn" onclick="clearX402Form()">Clear Form</button>
+          </div>
+          <div id="x402Result" style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; display: none;">
+            <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--accent);">Payment Requirements JSON</h3>
+            <pre id="x402RequirementsJson" style="margin: 0; padding: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); overflow-x: auto; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: 6px;"></pre>
+          </div>
+        </section>
+
+        <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
+          <h2>📡 Tap-to-Pay Scanner (Web Bluetooth)</h2>
+          <div class="hero-sub" style="margin-bottom: 16px;">
+            Connect to nearby x402 payment devices via Bluetooth Low Energy (BLE). Perfect for IoT devices, vending machines, and physical payment terminals.
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <div id="bleStatus" style="width: 8px; height: 8px; border-radius: 50%; background: var(--muted);"></div>
+              <span id="bleStatusText" style="font-size: 13px; color: var(--muted);">Ready to scan</span>
+            </div>
+            
+            <button class="btn primary" onclick="scanBluetoothDevices()" id="scanBtn">
+              <span style="margin-right: 8px;">⊕</span>
+              Scan for Devices
+            </button>
+          </div>
+
+          <div id="bleDeviceInfo" style="display: none; margin-top: 16px; padding: 12px; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2); border-radius: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--ok);"></div>
+              <strong style="font-size: 13px;">Connected Device</strong>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted);" id="deviceName"></div>
+            
+            <div style="margin-top: 16px; font-size: 12px; color: var(--muted);">
+              Payment info from device:
+            </div>
+            <div id="devicePaymentInfo" style="margin-top: 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent);"></div>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; font-size: 11px; color: var(--muted);">
+            <strong>Note:</strong> Web Bluetooth API requires HTTPS or localhost. Compatible with Chrome, Edge, or Opera. Make sure your x402 device is discoverable and in range.
+          </div>
+        </section>
+
+        <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
+          <h2>📊 Network Information</h2>
+          <div class="hero-sub" style="margin-bottom: 16px;">
+            Supported networks and their USDC contract addresses for x402 payments.
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+              <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Base Sepolia</div>
+              <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0x036CbD...</div>
+            </div>
+            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+              <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Base</div>
+              <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0x833589fC...</div>
+            </div>
+            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+              <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Avalanche</div>
+              <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0xB97EF9Ef...</div>
+            </div>
+            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+              <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Polygon</div>
+              <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0x3c499c5...</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span>x402 Payments for Machines</span>
+        <span style="font-size: 11px; color: var(--muted);">
+          Powered by <a href="https://x402.org" target="_blank" style="color: var(--accent); text-decoration: none;">x402 Protocol</a> & 
+          <a href="https://github.com/AbhinavBuilds/x4-pay-core" target="_blank" style="color: var(--accent); text-decoration: none;">x4-pay-core</a>
+        </span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // x402 Payment Functions
+    async function generatePaymentRequirements() {
+      const network = document.getElementById('x402Network').value;
+      const amount = document.getElementById('x402Amount').value;
+      const payTo = document.getElementById('x402PayTo').value;
+      const description = document.getElementById('x402Description').value;
+
+      if (!network || !amount || !payTo) {
+        alert('Please fill in Network, Amount, and Pay To address');
+        return;
+      }
+
+      // Build payment requirements manually if API not available
+      const requirements = buildPaymentRequirements(network, amount, payTo, description);
+      
+      document.getElementById('x402RequirementsJson').textContent = JSON.stringify(requirements, null, 2);
+      document.getElementById('x402Result').style.display = 'block';
+      
+      // Try to call API if available
+      try {
+        const r = await fetch('/api/x402/requirements', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ network, amount, payTo, description })
+        });
+        const d = await r.json();
+        if (d.success && d.requirements) {
+          document.getElementById('x402RequirementsJson').textContent = JSON.stringify(d.requirements, null, 2);
+          alert('✅ Payment requirements generated successfully!');
+        }
+      } catch (e) {
+        // API not available, use local version
+        alert('✅ Payment requirements generated (local mode)!');
+      }
+    }
+
+    function buildPaymentRequirements(network, amount, payTo, description = '') {
+      const networkAssets = {
+        'base-sepolia': { address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', name: 'USDC' },
+        'base': { address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', name: 'USD Coin' },
+        'avalanche-fuji': { address: '0x5425890298aed601595a70AB815c96711a31Bc65', name: 'USD Coin' },
+        'avalanche': { address: '0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E', name: 'USD Coin' },
+        'polygon-amoy': { address: '0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582', name: 'USDC' },
+        'polygon': { address: '0x3c499c542cef5e3811e1192ce70d8cc03d5c3359', name: 'USD Coin' },
+        'sei-testnet': { address: '0x4fcf1784b31630811181f670aea7a7bef803eaed', name: 'USDC' },
+        'sei': { address: '0xe15fc38f6d8c56af07bbcbe3baf5708a2bf42392', name: 'USDC' },
+        'iotex': { address: '0xcdf79194c6c285077a58da47641d4dbe51f63542', name: 'Bridged USDC' },
+        'peaq': { address: '0xbbA60da06c2c5424f03f7434542280FCAd453d10', name: 'USDC' }
+      };
+
+      const asset = networkAssets[network] || networkAssets['base-sepolia'];
+
+      return {
+        scheme: 'exact',
+        network: network,
+        maxAmountRequired: amount,
+        resource: 'https://x402ble.io',
+        description: description,
+        mimeType: 'application/json',
+        payTo: payTo,
+        maxTimeoutSeconds: 300,
+        asset: asset.address,
+        extra: {
+          name: asset.name,
+          version: '2'
+        }
+      };
+    }
+
+    function clearX402Form() {
+      document.getElementById('x402Network').value = 'base-sepolia';
+      document.getElementById('x402Amount').value = '1.00';
+      document.getElementById('x402PayTo').value = '';
+      document.getElementById('x402Description').value = '';
+      document.getElementById('x402Result').style.display = 'none';
+    }
+
+    // Web Bluetooth functionality
+    const SERVICE_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+    const TX_CHAR_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+    const RX_CHAR_UUID = '6e400004-b5a3-f393-e0a9-e50e24dcca9e';
+    
+    let bleDevice = null;
+    let bleServer = null;
+    let bleService = null;
+    let bleRXChar = null;
+    let bleTXChar = null;
+    let bleConnected = false;
+
+    function updateBLEStatus(connected) {
+      const statusEl = document.getElementById('bleStatus');
+      const statusText = document.getElementById('bleStatusText');
+      bleConnected = connected;
+      
+      if (connected) {
+        statusEl.style.background = 'var(--ok)';
+        statusText.textContent = 'Connected';
+      } else {
+        statusEl.style.background = 'var(--muted)';
+        statusText.textContent = 'Ready to scan';
+      }
+    }
+
+    async function scanBluetoothDevices() {
+      if (!navigator.bluetooth) {
+        alert('Web Bluetooth is not supported in this browser. Please use Chrome, Edge, or Opera.');
+        return;
+      }
+
+      const btn = document.getElementById('scanBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span style="margin-right: 8px;">⟳</span> Scanning...';
+
+      try {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: [SERVICE_UUID] }],
+          optionalServices: [SERVICE_UUID],
+        });
+
+        device.addEventListener('gattserverdisconnected', () => {
+          console.log('Device disconnected');
+          bleConnected = false;
+          updateBLEStatus(false);
+          document.getElementById('bleDeviceInfo').style.display = 'none';
+        });
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(SERVICE_UUID);
+        const rx = await service.getCharacteristic(RX_CHAR_UUID);
+        const tx = await service.getCharacteristic(TX_CHAR_UUID);
+
+        await tx.startNotifications();
+        tx.addEventListener('characteristicvaluechanged', (event) => {
+          handleBLENotification(event);
+        });
+
+        bleDevice = device;
+        bleServer = server;
+        bleService = service;
+        bleRXChar = rx;
+        bleTXChar = tx;
+
+        updateBLEStatus(true);
+        
+        document.getElementById('deviceName').textContent = device.name || 'Unknown Device';
+        document.getElementById('bleDeviceInfo').style.display = 'block';
+        
+        // Fetch initial data
+        await fetchDeviceData();
+        
+      } catch (error) {
+        console.error('Bluetooth error:', error);
+        if (error.name !== 'NotFoundError') {
+          alert('Error connecting to device: ' + error.message);
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span style="margin-right: 8px;">⊕</span> Scan for Devices';
+      }
+    }
+
+    async function fetchDeviceData() {
+      if (!bleRXChar) return;
+      
+      // Request device info
+      await sendBLEData('[LOGO]');
+      await delay(200);
+      await sendBLEData('[BANNER]');
+      await delay(200);
+      await sendBLEData('[DESC]');
+      await delay(200);
+      await sendBLEData('[CONFIG]');
+      await delay(200);
+      await sendBLEData('[OPTIONS]');
+    }
+
+    async function sendBLEData(data) {
+      if (!bleRXChar) return;
+      
+      try {
+        const encoder = new TextEncoder();
+        const encoded = encoder.encode(data);
+        await bleRXChar.writeValue(encoded);
+        console.log('Sent:', data);
+        await delay(10);
+      } catch (error) {
+        console.error('Error sending data:', error);
+      }
+    }
+
+    function handleBLENotification(event) {
+      const value = event.target.value;
+      const decoder = new TextDecoder('utf-8');
+      const text = decoder.decode(value);
+      
+      console.log('Received:', text);
+      
+      // Parse notifications
+      if (text.startsWith('402://')) {
+        const data = JSON.parse(text.slice(6));
+        document.getElementById('devicePaymentInfo').innerHTML = `
+          Network: ${data.network}<br>
+          Price: ${data.price} USDC<br>
+          Pay To: ${data.payTo.substring(0,20)}...
+        `;
+        alert('💳 Payment request received: ' + data.price + ' USDC on ' + data.network);
+      } else if (text.startsWith('LOGO://')) {
+        console.log('Logo:', text.slice(7));
+      } else if (text.startsWith('BANNER://')) {
+        console.log('Banner:', text.slice(9));
+      } else if (text.startsWith('DESC://')) {
+        console.log('Description:', text.slice(7));
+      } else if (text.startsWith('CONFIG://')) {
+        console.log('Config:', text.slice(9));
+      } else if (text.startsWith('OPTIONS://')) {
+        console.log('Options:', text.slice(10));
+      } else if (text.startsWith('PAYMENT:COMPLETE')) {
+        const txHash = text.split('TX:')[1]?.split(' ')[0];
+        console.log('Payment complete:', text);
+        alert('✅ Payment completed successfully!\nTransaction: ' + txHash);
+      }
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Animated galaxy starfield background
+    (function initGalaxy(){
+      const canvas = document.getElementById('galaxy');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, stars = [], tail = 0.08;
+      function resize(){
+        w = canvas.width = window.innerWidth || document.documentElement.clientWidth;
+        h = canvas.height = window.innerHeight || document.documentElement.clientHeight;
+        const count = Math.min(280, Math.floor((w*h)/7500));
+        stars = new Array(count).fill(0).map(spawn);
+      }
+      function spawn(){
+        const angle = Math.random()*Math.PI*2;
+        const speed = 0.15 + Math.random()*0.9;
+        return {
+          x: Math.random()*w,
+          y: Math.random()*h,
+          vx: Math.cos(angle)*speed,
+          vy: Math.sin(angle)*speed,
+          r: Math.random()*1.6 + 0.3,
+          hue: 200 + Math.random()*160
+        };
+      }
+      window.addEventListener('resize', resize); resize();
+      function tick(){
+        ctx.fillStyle = `rgba(7,5,17,${tail})`;
+        ctx.fillRect(0,0,w,h);
+        for (let i=0;i<stars.length;i++){
+          const s = stars[i];
+          s.x += s.vx; s.y += s.vy;
+          if (s.x < -20 || s.x > w+20 || s.y < -20 || s.y > h+20){ stars[i] = spawn(); continue; }
+          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*6);
+          grad.addColorStop(0, `hsla(${s.hue},100%,80%,0.95)`);
+          grad.addColorStop(1, 'hsla(0,0%,0%,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r*6, 0, Math.PI*2);
+          ctx.fill();
+        }
+        requestAnimationFrame(tick);
+      }
+      tick();
+    })();
+
+    // Swirling spiral galaxy overlay
+    (function initSwirl(){
+      const canvas = document.getElementById('swirl');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, t = 0;
+      function resize(){
+        w = canvas.width = window.innerWidth || document.documentElement.clientWidth;
+        h = canvas.height = window.innerHeight || document.documentElement.clientHeight;
+      }
+      window.addEventListener('resize', resize); resize();
+      function arm(angleOffset, color){
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        const cx = w/2, cy = h/2;
+        for (let i=0; i<720; i+=6){
+          const a = (i*Math.PI/180) + angleOffset + t*0.0025;
+          const r = 0.6*i;
+          const x = cx + Math.cos(a)*r*0.15;
+          const y = cy + Math.sin(a)*r*0.15;
+          if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+      function tick(){
+        ctx.clearRect(0,0,w,h);
+        const g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.min(w,h)/2);
+        g.addColorStop(0,'rgba(255,255,255,0.06)');
+        g.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
+        arm(0, 'rgba(125,211,252,0.45)');
+        arm(Math.PI, 'rgba(192,132,252,0.45)');
+        t+=1;
+        requestAnimationFrame(tick);
+      }
+      tick();
+    })();
+
+    // Check if Web Bluetooth is supported
+    if (!navigator.bluetooth) {
+      console.warn('Web Bluetooth not supported in this browser');
+    }
+  </script>
+</body>
+</html>
+

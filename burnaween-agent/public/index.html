@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>FLINT PROTOCOL - Auto Buy & Burn Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --lava-black: #080607;
+      --lava-charcoal: #141013;
+      --lava-smoke: #231c20;
+      --lava-ember: #ff6b35;
+      --lava-crimson: #ff3c2b;
+      --lava-amber: #ffb347;
+      --lava-gold: #ffd166;
+      --lava-cinder: #443135;
+      --text-primary: #ffe9d6;
+      --text-secondary: #ffc9a2;
+      --text-muted: #f7c59f;
+      --border-glow: rgba(255, 107, 53, 0.35);
+      --glow-primary: rgba(255, 107, 53, 0.55);
+      --glow-secondary: rgba(255, 193, 102, 0.35);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 107, 53, 0.12), transparent 35%),
+        radial-gradient(circle at 80% 20%, rgba(255, 193, 102, 0.12), transparent 40%),
+        linear-gradient(135deg, var(--lava-black) 0%, var(--lava-charcoal) 50%, var(--lava-smoke) 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    #ember-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .ember {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--lava-crimson), var(--lava-amber));
+      box-shadow: 0 0 18px rgba(255, 94, 31, 0.75);
+      animation: emberFall linear infinite;
+      opacity: 0.85;
+    }
+
+    @keyframes emberFall {
+      0% { transform: translateY(-100vh) translateX(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.9; }
+      90% { opacity: 0.8; }
+      100% { transform: translateY(100vh) translateX(var(--drift)) rotate(360deg); opacity: 0; }
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(8, 6, 7, 0.88);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glow);
+      z-index: 1000;
+      padding: 1rem 3rem;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(120deg, var(--lava-crimson), var(--lava-amber), var(--lava-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 25px rgba(255, 107, 53, 0.45);
+      letter-spacing: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+      font-size: 0.9rem;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+    }
+
+    .nav-links a:hover {
+      color: var(--lava-amber);
+      background: rgba(255, 107, 53, 0.14);
+      box-shadow: 0 0 18px var(--glow-primary);
+    }
+
+    .main-content {
+      position: relative;
+      z-index: 10;
+      margin-top: 80px;
+    }
+
+    .hero {
+      padding: 4.5rem 2rem;
+      text-align: center;
+      background: linear-gradient(180deg, transparent 0%, rgba(20, 15, 18, 0.55) 100%);
+    }
+
+    .hero-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      background: rgba(255, 113, 53, 0.18);
+      border: 1px solid var(--lava-amber);
+      border-radius: 30px;
+      color: var(--lava-amber);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 18px var(--glow-primary);
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 18px var(--glow-primary); }
+      50% { box-shadow: 0 0 28px var(--glow-primary); }
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--lava-amber);
+      box-shadow: 0 0 10px rgba(255, 140, 80, 0.9);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.7rem, 6vw, 4.1rem);
+      font-weight: 900;
+      background: linear-gradient(125deg, var(--lava-crimson), var(--lava-amber), var(--lava-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 35px rgba(255, 107, 53, 0.35);
+      letter-spacing: 3px;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero h2 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 1px;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 720px;
+      margin: 0 auto 2.2rem auto;
+      line-height: 1.8;
+    }
+
+    .hero-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn {
+      padding: 0.9rem 2rem;
+      border-radius: 30px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--lava-crimson), var(--lava-amber));
+      color: var(--lava-black);
+      box-shadow: 0 4px 20px var(--glow-primary);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px var(--glow-primary);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 113, 53, 0.12);
+      color: var(--lava-amber);
+      border-color: var(--border-glow);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--lava-amber);
+      background: rgba(255, 113, 53, 0.18);
+      box-shadow: 0 0 20px var(--glow-secondary);
+    }
+
+    .countdown-section {
+      padding: 3rem 2rem;
+      background: rgba(20, 15, 18, 0.55);
+      border-top: 1px solid var(--border-glow);
+      border-bottom: 1px solid var(--border-glow);
+      backdrop-filter: blur(10px);
+    }
+
+    .countdown-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--lava-amber);
+      letter-spacing: 2px;
+      text-shadow: 0 0 18px var(--glow-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .countdown-box {
+      background: rgba(12, 9, 11, 0.75);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 520px;
+      margin: 0 auto;
+      box-shadow: 0 0 28px rgba(0, 0, 0, 0.55), inset 0 0 28px rgba(255, 107, 53, 0.12);
+    }
+
+    .countdown-timer {
+      font-size: 3rem;
+      font-weight: 800;
+      font-family: 'Space Mono', monospace;
+      color: var(--lava-amber);
+      letter-spacing: 5px;
+      text-shadow: 0 0 26px var(--glow-primary);
+      margin: 1rem 0;
+    }
+
+    .countdown-status {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+
+    .countdown-time {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      font-family: 'Space Mono', monospace;
+      color: var(--text-secondary);
+    }
+
+    .stats-section {
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, rgba(20, 15, 18, 0.55) 0%, rgba(8, 6, 7, 0.75) 100%);
+    }
+
+    .stats-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .stat-card {
+      background: rgba(14, 10, 12, 0.82);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.4s;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 140, 80, 0.12) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--lava-amber);
+      transform: translateY(-8px);
+      box-shadow: 0 10px 36px var(--glow-primary);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--lava-amber), var(--lava-crimson));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 20px var(--glow-primary);
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .controls-section {
+      padding: 4rem 2rem;
+      background: rgba(12, 9, 11, 0.78);
+      border-top: 1px solid var(--border-glow);
+    }
+
+    .controls-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .control-btn {
+      padding: 1rem 1.6rem;
+      background: rgba(14, 10, 12, 0.82);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      color: var(--text-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 120, 60, 0.28);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .control-btn:hover {
+      border-color: var(--lava-amber);
+      background: rgba(255, 120, 60, 0.18);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 28px var(--glow-primary);
+    }
+
+    .control-btn:hover::before {
+      width: 320px;
+      height: 320px;
+    }
+
+    .control-btn.active {
+      background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), rgba(255, 193, 102, 0.25));
+      border-color: var(--lava-amber);
+      box-shadow: 0 0 22px var(--glow-primary);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .features-section {
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, rgba(8, 6, 7, 0.78) 0%, rgba(20, 15, 18, 0.55) 100%);
+    }
+
+    .features-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      background: rgba(14, 10, 12, 0.82);
+      border: 1px solid var(--border-glow);
+      border-radius: 20px;
+      padding: 2rem;
+      transition: all 0.4s;
+      backdrop-filter: blur(10px);
+    }
+
+    .feature-card:hover {
+      border-color: var(--lava-amber);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 32px var(--glow-primary);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 12px var(--glow-primary));
+    }
+
+    .feature-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--lava-amber);
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-description {
+      color: var(--text-secondary);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    footer {
+      background: rgba(10, 7, 9, 0.92);
+      border-top: 1px solid var(--border-glow);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s;
+      padding: 0.5rem 1rem;
+      border-radius: 15px;
+    }
+
+    .footer-links a:hover {
+      color: var(--lava-amber);
+      background: rgba(255, 107, 53, 0.12);
+      box-shadow: 0 0 18px var(--glow-primary);
+    }
+
+    .notification {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      padding: 1.2rem 1.8rem;
+      border-radius: 15px;
+      color: white;
+      font-weight: 600;
+      z-index: 10000;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+      max-width: 400px;
+      backdrop-filter: blur(10px);
+      border: 2px solid;
+    }
+
+    .notification.success {
+      background: rgba(255, 113, 53, 0.22);
+      border-color: var(--lava-amber);
+      box-shadow: 0 0 30px var(--glow-primary);
+    }
+
+    .notification.error {
+      background: rgba(244, 67, 54, 0.22);
+      border-color: #f76c6c;
+    }
+
+    .notification.info {
+      background: rgba(255, 193, 102, 0.22);
+      border-color: var(--lava-gold);
+      box-shadow: 0 0 28px var(--glow-secondary);
+    }
+
+    .explosion-layer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    .explosion {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 40px rgba(255, 120, 60, 0.8), 0 0 80px rgba(255, 193, 102, 0.6);
+      transform: translate(-50%, -50%);
+      animation: explosion-core 0.7s ease-out forwards;
+    }
+
+    .explosion-particle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--lava-crimson), var(--lava-amber));
+      box-shadow: 0 0 20px rgba(255, 140, 80, 0.85);
+      transform: translate(-50%, -50%);
+      animation: explosion-particle 0.75s ease-out forwards;
+      opacity: 0.9;
+    }
+
+    @keyframes explosion-core {
+      0% { transform: scale(0.2) translate(-50%, -50%); opacity: 0.8; }
+      70% { transform: scale(18) translate(-50%, -50%); opacity: 0.4; }
+      100% { transform: scale(22) translate(-50%, -50%); opacity: 0; }
+    }
+
+    @keyframes explosion-particle {
+      0% { transform: translate(-50%, -50%) scale(0.4); opacity: 1; }
+      70% { opacity: 0.9; }
+      100% { transform: translate(calc(var(--dx) * 1px), calc(var(--dy) * 1px)) scale(0.2); opacity: 0; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 900px) {
+      nav { padding: 0.9rem 1.8rem; }
+      .nav-links { display: none; }
+      .hero { padding: 3.2rem 1.2rem; }
+      .hero-buttons { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+      .countdown-timer { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="ember-container"></div>
+  <div class="explosion-layer" id="explosionLayer"></div>
+
+  <nav>
+    <div class="nav-container">
+      <div class="logo">FLINT PROTOCOL</div>
+      <ul class="nav-links">
+        <li><a href="#countdown">Cycle Timer</a></li>
+        <li><a href="#stats">Telemetry</a></li>
+        <li><a href="#controls">Controls</a></li>
+        <li><a href="#features">Capabilities</a></li>
+        <li><a href="/api/health">API</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <section class="hero">
+      <div class="hero-container">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span id="statusBadgeText">ENGINE STANDBY</span>
+        </div>
+        <h1>FLINT PROTOCOL Auto Buy & Burn Command Center</h1>
+        <h2>Continuous Pump.fun accumulation followed by instant incineration on Solana</h2>
+        <p class="hero-subtitle">
+          Monitor, trigger, and tune FLINT PROTOCOL. Each cycle executes a Pump.fun buy for your configured mint,
+          waits for settlement, and vaporizes the position into the incinerator wallet with full telemetry and failover safeguards.
+        </p>
+        <div class="hero-buttons">
+          <button class="btn btn-primary" id="heroStartBtn" onclick="startEngine()">🔥 Start Engine</button>
+          <button class="btn btn-secondary" id="heroStopBtn" onclick="stopEngine()" style="display:none;">🧯 Stop Engine</button>
+          <button class="btn btn-secondary" onclick="triggerManualCycle()">⚡ Manual Cycle</button>
+          <button class="btn btn-secondary" onclick="checkStatus()">📊 Diagnostics</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="countdown-section" id="countdown">
+      <div class="countdown-container">
+        <h2 class="section-title">Next Auto Cycle</h2>
+        <div class="countdown-box">
+          <div class="countdown-timer" id="countdownTimer">--:--</div>
+          <div class="countdown-status" id="countdownStatus">Awaiting engine activation...</div>
+          <div class="countdown-time" id="countdownTime">--:--:--</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-section" id="stats">
+      <div class="stats-container">
+        <h2 class="section-title" style="text-align:center; margin-bottom:1rem;">FLINT PROTOCOL Telemetry</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="cyclesCount">0</div>
+            <div class="stat-label">Cycles Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="intervalSeconds">--</div>
+            <div class="stat-label">Interval (Seconds)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="lastBuySignature">--</div>
+            <div class="stat-label">Last Buy Signature</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="lastBurnSignature">--</div>
+            <div class="stat-label">Last Burn Signature</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="lastCycleError">OK</div>
+            <div class="stat-label">Last Cycle Status</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="controls-section" id="controls">
+      <div class="controls-container">
+        <h2 class="section-title" style="text-align:center; margin-bottom:1rem;">Engine Controls</h2>
+        <div class="controls-grid">
+          <button class="control-btn" id="startBtn" onclick="startEngine()">🔥 Start Engine</button>
+          <button class="control-btn" id="stopBtn" onclick="stopEngine()">🧯 Stop Engine</button>
+          <button class="control-btn" onclick="triggerManualCycle()">⚡ Manual Cycle</button>
+          <button class="control-btn" onclick="checkStatus()">📊 Diagnostics</button>
+          <button class="control-btn" onclick="updateTokenAddress()" style="border-color: var(--lava-amber);">🪙 Update Token Mint</button>
+          <button class="control-btn" onclick="copyApiLinks()">🔗 API Endpoints</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="features-section" id="features">
+      <div class="features-container">
+        <h2 class="section-title" style="text-align:center; margin-bottom:1rem;">Capabilities</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">⚙️</div>
+            <div class="feature-title">Automated Buy & Burn</div>
+            <div class="feature-description">
+              Executes Pump.fun buys on a timer, then routes purchased tokens directly to the Solana incinerator account.
+              Confirmation checks ensure each cycle completes before the next begins.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-title">Safety & Retry Logic</div>
+            <div class="feature-description">
+              Retry queues for both buy and burn operations with exponential backoff, balance checks, and signature audits keep the engine resilient during RPC turbulence.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📡</div>
+            <div class="feature-title">Real-Time Telemetry</div>
+            <div class="feature-description">
+              Countdown, cycle statistics, and signature history provide immediate confirmation of each buy & burn execution.
+              Manual triggers are available for controlled test fires.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🧪</div>
+            <div class="feature-title">Manual Overrides</div>
+            <div class="feature-description">
+              Execute manual cycles on-demand, update the active mint address without rebooting, and inspect health/status endpoints while automation continues running.
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🚀</div>
+            <div class="feature-title">Production Hardened</div>
+            <div class="feature-description">
+              Graceful shutdown hooks, structured logging, environment validation, and a dedicated UI let you deploy FLINT PROTOCOL on dedicated servers or serverless platforms with confidence.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-links">
+        <a href="/api/health">Health Check</a>
+        <a href="/api/auto-cycle/status">Engine Status</a>
+        <a href="https://solscan.io" target="_blank">Solscan</a>
+        <a href="https://pump.fun" target="_blank">Pump.fun</a>
+      </div>
+      <p>© 2025 FLINT PROTOCOL. Automated buy & burn system for the Solana ecosystem.</p>
+      <p style="margin-top:0.5rem; font-size:0.75rem; color:var(--text-muted);">
+        Powered by Pump.fun trade APIs, Solana RPC infrastructure, and the SPL Token Program incinerator.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function createEmber() {
+      const ember = document.createElement('div');
+      ember.className = 'ember';
+      ember.style.left = Math.random() * 100 + '%';
+      ember.style.opacity = Math.random() * 0.4 + 0.6;
+      const size = Math.random() * 6 + 4;
+      ember.style.width = `${size}px`;
+      ember.style.height = `${size}px`;
+      ember.style.animationDuration = Math.random() * 4 + 6 + 's';
+      ember.style.animationDelay = Math.random() * 2 + 's';
+      ember.style.setProperty('--drift', (Math.random() * 160 - 80) + 'px');
+      document.getElementById('ember-container').appendChild(ember);
+      setTimeout(() => ember.remove(), 9000);
+    }
+
+    setInterval(createEmber, 220);
+    for (let i = 0; i < 40; i++) {
+      setTimeout(() => createEmber(), i * 120);
+    }
+
+    let countdownInterval = null;
+    let nextCycleTime = null;
+    let isEngineRunning = false;
+    let lastSeenBurnSignature = null;
+
+    const badgeTextEl = document.getElementById('statusBadgeText');
+
+    function updateBadge(running) {
+      if (!badgeTextEl) return;
+      if (running) {
+        badgeTextEl.textContent = 'ENGINE ONLINE';
+      } else {
+        badgeTextEl.textContent = 'ENGINE STANDBY';
+      }
+    }
+
+    function updateCountdown() {
+      const timer = document.getElementById('countdownTimer');
+      const status = document.getElementById('countdownStatus');
+      const detail = document.getElementById('countdownTime');
+      if (!timer || !status) return;
+
+      if (!isEngineRunning || !nextCycleTime) {
+        timer.textContent = '--:--';
+        status.textContent = 'Engine idle. Start the auto buy & burn cycle to engage.';
+        if (detail) detail.textContent = '--:--:--';
+        return;
+      }
+
+      const now = Date.now();
+      const timeLeft = Math.max(0, nextCycleTime - now);
+
+      if (timeLeft <= 1000) {
+        timer.textContent = '00:00';
+        status.textContent = 'Executing buy & burn cycle...';
+        if (detail) {
+          detail.textContent = 'Processing... awaiting next schedule';
+        }
+        setTimeout(() => refreshEngineStatus(), 3000);
+        return;
+      }
+
+      const totalSeconds = Math.floor(timeLeft / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      timer.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (timeLeft <= 5000) {
+        status.textContent = 'Priming burn sequence...';
+      } else {
+        status.textContent = 'Engine online. Auto buy & burn standing by.';
+      }
+
+      if (detail) {
+        const nextDate = new Date(nextCycleTime);
+        const nowDate = new Date();
+        const prefix = nextDate.toDateString() !== nowDate.toDateString()
+          ? nextDate.toLocaleDateString() + ' ' : '';
+        detail.textContent = `Next Cycle: ${prefix}${nextDate.toLocaleTimeString()}`;
+      }
+    }
+
+    function startCountdown() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+      }
+      countdownInterval = setInterval(updateCountdown, 1000);
+      updateCountdown();
+    }
+
+    function stopCountdown() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      isEngineRunning = false;
+      nextCycleTime = null;
+      updateCountdown();
+    }
+
+    async function refreshEngineStatus(showIdleNotice = false) {
+      try {
+        const res = await fetch('/api/auto-cycle/status');
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+
+        const data = json.data;
+        isEngineRunning = !!data.running;
+        updateBadge(isEngineRunning);
+
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const heroStartBtn = document.getElementById('heroStartBtn');
+        const heroStopBtn = document.getElementById('heroStopBtn');
+
+        if (isEngineRunning) {
+          startBtn?.classList.add('active');
+          stopBtn?.classList.remove('active');
+          if (heroStartBtn) heroStartBtn.style.display = 'none';
+          if (heroStopBtn) heroStopBtn.style.display = 'inline-flex';
+          if (data.timeUntilNextMs !== null && data.timeUntilNextMs !== undefined) {
+            nextCycleTime = Date.now() + data.timeUntilNextMs;
+          } else if (data.intervalMs) {
+            nextCycleTime = Date.now() + data.intervalMs;
+          }
+          if (!countdownInterval) startCountdown();
+        } else {
+          startBtn?.classList.remove('active');
+          stopBtn?.classList.add('active');
+          if (heroStartBtn) heroStartBtn.style.display = 'inline-flex';
+          if (heroStopBtn) heroStopBtn.style.display = 'none';
+          stopCountdown();
+          if (showIdleNotice) showNotification('⏹️ Engine remains idle', 'info');
+        }
+
+        if (startBtn) {
+          startBtn.disabled = false;
+          startBtn.textContent = '🔥 Start Engine';
+        }
+        if (stopBtn) {
+          stopBtn.disabled = false;
+          stopBtn.textContent = '🧯 Stop Engine';
+        }
+        if (heroStartBtn) {
+          heroStartBtn.disabled = false;
+          heroStartBtn.textContent = '🔥 Start Engine';
+        }
+
+        document.getElementById('cyclesCount').textContent = data.totalCycles ?? 0;
+        const intervalSeconds = data.intervalSeconds ?? (data.intervalMs ? Math.round(data.intervalMs / 1000) : '--');
+        document.getElementById('intervalSeconds').textContent = intervalSeconds;
+        document.getElementById('lastBuySignature').textContent = data.lastBuySignature
+          ? data.lastBuySignature.substring(0, 6) + '…'
+          : '--';
+        document.getElementById('lastBurnSignature').textContent = data.lastBurnSignature
+          ? data.lastBurnSignature.substring(0, 6) + '…'
+          : '--';
+
+        if (data.lastBurnSignature && data.lastBurnSignature !== lastSeenBurnSignature) {
+          lastSeenBurnSignature = data.lastBurnSignature;
+          triggerExplosionEffect();
+        }
+
+        const lastErrorEl = document.getElementById('lastCycleError');
+        if (data.lastCycleError) {
+          lastErrorEl.textContent = 'ERR';
+          lastErrorEl.style.color = '#ff6b6b';
+        } else {
+          lastErrorEl.textContent = 'OK';
+          lastErrorEl.style.color = 'var(--lava-amber)';
+        }
+
+        if (data.nextCycleTime && !Number.isNaN(Number(data.nextCycleTime))) {
+          nextCycleTime = data.nextCycleTime;
+          if (!countdownInterval) startCountdown();
+        }
+
+        updateCountdown();
+      } catch (error) {
+        console.error('Engine status error:', error);
+        showNotification('❌ Status check failed: ' + error.message, 'error');
+      }
+    }
+
+    async function startEngine() {
+      try {
+        const startBtn = document.getElementById('startBtn');
+        const heroStartBtn = document.getElementById('heroStartBtn');
+        if (startBtn) {
+          startBtn.disabled = true;
+          startBtn.textContent = '⏳ Igniting...';
+        }
+        if (heroStartBtn) {
+          heroStartBtn.disabled = true;
+          heroStartBtn.textContent = '⏳ Igniting...';
+        }
+
+        const res = await fetch('/api/auto-cycle/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const json = await res.json();
+        if (json.success) {
+          showNotification('🔥 Auto buy & burn engine engaged!', 'success');
+          await refreshEngineStatus();
+        } else {
+          showNotification('❌ Failed to start engine: ' + (json.message || json.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showNotification('❌ Engine start failed: ' + error.message, 'error');
+      } finally {
+        const startBtn = document.getElementById('startBtn');
+        const heroStartBtn = document.getElementById('heroStartBtn');
+        if (startBtn) {
+          startBtn.disabled = false;
+          startBtn.textContent = '🔥 Start Engine';
+        }
+        if (heroStartBtn) {
+          heroStartBtn.disabled = false;
+          heroStartBtn.textContent = '🔥 Start Engine';
+        }
+      }
+    }
+
+    async function stopEngine() {
+      try {
+        const stopBtn = document.getElementById('stopBtn');
+        if (stopBtn) {
+          stopBtn.disabled = true;
+          stopBtn.textContent = '⏳ Shutting down...';
+        }
+        const res = await fetch('/api/auto-cycle/stop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const json = await res.json();
+        if (json.success) {
+          showNotification('🧯 Engine shut down', 'success');
+          stopCountdown();
+          await refreshEngineStatus(true);
+        } else {
+          showNotification('❌ Stop failed: ' + (json.message || json.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showNotification('❌ Stop failed: ' + error.message, 'error');
+      } finally {
+        const stopBtn = document.getElementById('stopBtn');
+        if (stopBtn) {
+          stopBtn.disabled = false;
+          stopBtn.textContent = '🧯 Stop Engine';
+        }
+      }
+    }
+
+    async function triggerManualCycle() {
+      try {
+        showNotification('⚡ Manual cycle triggered', 'info');
+        const res = await fetch('/api/auto-cycle/trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const json = await res.json();
+        if (json.success) {
+          showNotification('🔥 Manual buy & burn completed!', 'success');
+        } else {
+          showNotification('❌ Manual cycle failed: ' + (json.error || json.message || 'Unknown error'), 'error');
+        }
+        await refreshEngineStatus();
+      } catch (error) {
+        showNotification('❌ Manual cycle error: ' + error.message, 'error');
+      }
+    }
+
+    function checkStatus() {
+      refreshEngineStatus(true);
+    }
+
+    async function updateTokenAddress() {
+      const tokenMintAddress = prompt('Enter the new token mint address:');
+      if (!tokenMintAddress || tokenMintAddress.trim() === '') return;
+      try {
+        const res = await fetch('/api/auto-cycle/update-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tokenMintAddress: tokenMintAddress.trim() })
+        });
+        const json = await res.json();
+        if (json.success) {
+          showNotification('✅ Token mint updated successfully!', 'success');
+          refreshEngineStatus();
+        } else {
+          showNotification('❌ Failed to update token: ' + (json.error || 'Unknown error'), 'error');
+        }
+      } catch (error) {
+        showNotification('❌ Error updating token: ' + error.message, 'error');
+      }
+    }
+
+    function copyApiLinks() {
+      const endpoints = [
+        '/api/auto-cycle/status',
+        '/api/auto-cycle/start',
+        '/api/auto-cycle/stop',
+        '/api/auto-cycle/trigger'
+      ].map(path => window.location.origin + path).join('\n');
+
+      navigator.clipboard.writeText(endpoints)
+        .then(() => showNotification('🔗 API endpoints copied to clipboard', 'success'))
+        .catch(() => showNotification('ℹ️ Endpoints:\n' + endpoints, 'info'));
+    }
+
+    function showNotification(message, type = 'info') {
+      document.querySelectorAll('.notification').forEach(n => n.remove());
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.style.animation = 'slideIn 0.3s ease-out reverse';
+        setTimeout(() => notification.remove(), 300);
+      }, 5000);
+    }
+
+    function triggerExplosionEffect() {
+      const layer = document.getElementById('explosionLayer');
+      if (!layer) return;
+      const explosion = document.createElement('div');
+      explosion.className = 'explosion';
+      const rect = layer.getBoundingClientRect();
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      explosion.style.left = `${centerX}px`;
+      explosion.style.top = `${centerY}px`;
+
+      for (let i = 0; i < 14; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'explosion-particle';
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 120 + Math.random() * 90;
+        particle.style.left = `${centerX}px`;
+        particle.style.top = `${centerY}px`;
+        particle.style.setProperty('--dx', Math.cos(angle) * distance);
+        particle.style.setProperty('--dy', Math.sin(angle) * distance);
+        explosion.appendChild(particle);
+      }
+
+      layer.appendChild(explosion);
+      setTimeout(() => explosion.remove(), 800);
+    }
+
+    console.log('[INIT] FLINT PROTOCOL portal loading...');
+
+    if (!countdownInterval) startCountdown();
+    refreshEngineStatus();
+    setInterval(() => refreshEngineStatus(), 10000);
+    setInterval(() => {
+      if (isEngineRunning && nextCycleTime) {
+        const timeLeft = nextCycleTime - Date.now();
+        if (timeLeft > 0 && timeLeft < 5000) refreshEngineStatus();
+      }
+    }, 5000);
+    setInterval(() => {
+      if (isEngineRunning && !countdownInterval) startCountdown();
+    }, 2000);
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  </script>
+</body>
+</html>
+

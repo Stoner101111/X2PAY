@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X402 Payment Client Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .wallet-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 X402 Payment Client Example</h1>
+        <p class="subtitle">Demonstrate x402 micropayments in the browser</p>
+
+        <div class="wallet-info" id="walletInfo">
+            <strong>Wallet Status:</strong> <span id="walletStatus">Not Connected</span>
+            <br>
+            <strong>Address:</strong> <span id="walletAddress">-</span>
+        </div>
+
+        <div class="section">
+            <h2>1. Connect Wallet</h2>
+            <button onclick="connectWallet()">Connect MetaMask / Coinbase Wallet</button>
+        </div>
+
+        <div class="section">
+            <h2>2. Make Payment Request</h2>
+            <label>Service URL:</label>
+            <input type="text" id="serviceUrl" value="http://localhost:3000/api/services/data-query" placeholder="Service endpoint URL">
+            
+            <label>Request Data (JSON):</label>
+            <textarea id="requestData" placeholder='{"query": "example query"}'></textarea>
+            
+            <button onclick="makePayment()" id="payButton" disabled>Make Payment Request</button>
+            
+            <div id="paymentStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. Get Payment Requirements</h2>
+            <button onclick="getRequirements()">Get Requirements</button>
+            <div id="requirementsDisplay"></div>
+        </div>
+
+        <div class="section">
+            <h2>4. Payment Response</h2>
+            <div id="responseDisplay"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // In a real implementation, import the X402 client SDK
+        // For this example, we'll use a simplified version
+
+        let walletProvider = null;
+        let currentAddress = null;
+
+        window.connectWallet = async function() {
+            try {
+                // Check for MetaMask or Coinbase Wallet
+                if (typeof window.ethereum !== 'undefined') {
+                    walletProvider = window.ethereum;
+                    
+                    // Request account access
+                    const accounts = await window.ethereum.request({ 
+                        method: 'eth_requestAccounts' 
+                    });
+                    
+                    currentAddress = accounts[0];
+                    
+                    document.getElementById('walletStatus').textContent = 'Connected';
+                    document.getElementById('walletAddress').textContent = currentAddress;
+                    document.getElementById('payButton').disabled = false;
+                    
+                    showStatus('success', 'Wallet connected successfully!');
+                } else {
+                    showStatus('error', 'No wallet found. Please install MetaMask or Coinbase Wallet.');
+                }
+            } catch (error) {
+                showStatus('error', 'Failed to connect wallet: ' + error.message);
+            }
+        };
+
+        window.getRequirements = async function() {
+            const serviceUrl = document.getElementById('serviceUrl').value;
+            
+            try {
+                const response = await fetch(serviceUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                if (response.status === 402) {
+                    const data = await response.json();
+                    document.getElementById('requirementsDisplay').innerHTML = 
+                        `<div class="code-block">${JSON.stringify(data.requirements, null, 2)}</div>`;
+                    showStatus('info', 'Payment requirements received');
+                } else {
+                    showStatus('error', 'Service did not return payment requirements');
+                }
+            } catch (error) {
+                showStatus('error', 'Error: ' + error.message);
+            }
+        };
+
+        window.makePayment = async function() {
+            if (!walletProvider || !currentAddress) {
+                showStatus('error', 'Please connect your wallet first');
+                return;
+            }
+
+            const serviceUrl = document.getElementById('serviceUrl').value;
+            const requestDataText = document.getElementById('requestData').value;
+            
+            let requestData = {};
+            try {
+                if (requestDataText.trim()) {
+                    requestData = JSON.parse(requestDataText);
+                }
+            } catch (e) {
+                showStatus('error', 'Invalid JSON in request data');
+                return;
+            }
+
+            showStatus('info', 'Getting payment requirements...');
+
+            try {
+                // Step 1: Get payment requirements
+                const requirementsResponse = await fetch(serviceUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (requirementsResponse.status !== 402) {
+                    const data = await requirementsResponse.json();
+                    document.getElementById('responseDisplay').innerHTML = 
+                        `<div class="code-block">${JSON.stringify(data, null, 2)}</div>`;
+                    showStatus('success', 'Service responded without payment requirement');
+                    return;
+                }
+
+                const { requirements, service } = await requirementsResponse.json();
+                showStatus('info', 'Creating payment signature...');
+
+                // Step 2: Create payment payload (simplified - use @coinbase/x402 SDK in production)
+                const paymentPayload = await createPaymentPayload(requirements);
+                showStatus('info', 'Submitting payment...');
+
+                // Step 3: Make payment request
+                const response = await fetch(serviceUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-402-Version': '1'
+                    },
+                    body: JSON.stringify({
+                        paymentPayload,
+                        ...requestData
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('responseDisplay').innerHTML = 
+                        `<div class="code-block">${JSON.stringify(data, null, 2)}</div>`;
+                    showStatus('success', 'Payment successful! Service delivered.');
+                } else {
+                    document.getElementById('responseDisplay').innerHTML = 
+                        `<div class="code-block">${JSON.stringify(data, null, 2)}</div>`;
+                    showStatus('error', 'Payment failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                showStatus('error', 'Error: ' + error.message);
+            }
+        };
+
+        async function createPaymentPayload(requirements) {
+            // Generate nonce
+            const nonce = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+                .map(b => b.toString(16).padStart(2, '0')).join('');
+
+            const now = Math.floor(Date.now() / 1000);
+            const validAfter = now.toString();
+            const validBefore = (now + (requirements.maxTimeoutSeconds || 300)).toString();
+
+            // Calculate amount (USDC has 6 decimals)
+            const amount = Math.floor(parseFloat(requirements.maxAmountRequired) * 1_000_000).toString();
+
+            const authorization = {
+                from: currentAddress,
+                to: requirements.payTo,
+                value: amount,
+                validAfter,
+                validBefore,
+                nonce
+            };
+
+            // Sign with wallet (EIP-712)
+            const chainId = getChainId(requirements.network);
+            const signature = await walletProvider.request({
+                method: 'eth_signTypedData_v4',
+                params: [
+                    currentAddress,
+                    JSON.stringify({
+                        domain: {
+                            name: 'x402',
+                            version: '1',
+                            chainId: chainId
+                        },
+                        types: {
+                            PaymentAuthorization: [
+                                { name: 'from', type: 'address' },
+                                { name: 'to', type: 'address' },
+                                { name: 'value', type: 'uint256' },
+                                { name: 'validAfter', type: 'uint256' },
+                                { name: 'validBefore', type: 'uint256' },
+                                { name: 'nonce', type: 'bytes32' }
+                            ]
+                        },
+                        primaryType: 'PaymentAuthorization',
+                        message: authorization
+                    })
+                ]
+            });
+
+            return {
+                x402Version: 1,
+                scheme: requirements.scheme || 'exact',
+                network: requirements.network,
+                payload: {
+                    signature,
+                    authorization
+                }
+            };
+        }
+
+        function getChainId(network) {
+            const chainIdMap = {
+                'base-sepolia': 84532,
+                'base': 8453,
+                'avalanche-fuji': 43113,
+                'avalanche': 43114,
+                'iotex': 4689,
+                'sei': 1329,
+                'polygon': 137,
+                'polygon-amoy': 80002
+            };
+            return chainIdMap[network] || 1;
+        }
+
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('paymentStatus');
+            statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>
+

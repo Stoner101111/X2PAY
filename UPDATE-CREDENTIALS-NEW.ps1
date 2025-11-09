@@ -1,8 +1,8 @@
-# X2PAY - Update Wallet & API Credentials
+# X402GATE - Update Wallet & API Credentials
 
 Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
-Write-Host "UPDATING X2PAY CREDENTIALS" -ForegroundColor Blue
+Write-Host "🔄 UPDATING X402GATE CREDENTIALS 🔄" -ForegroundColor Green
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -10,35 +10,36 @@ $envContent = @"
 NODE_ENV=development
 PORT=3000
 HOST=0.0.0.0
-SOLANA_PUBLIC_KEY=4BLLfDnAkZ5dk63d6GE2ShY9QEof9vrXyWZe7nTeMdH4
-SOLANA_PRIVATE_KEY=2X8TPTbgdoQGZ662eUP8bZZB36TuL7SGaSWYdhCUjBvCSgzq2WcDU1Ma3mgf55PpYLKzAZFG6qZ2ephvCG7aNZkE
+SOLANA_PUBLIC_KEY=gsrRicZVTocSkP1R7krsHNaQikngv7DfkCZ98LpzM8M
+SOLANA_PRIVATE_KEY=2V2Z5mmWerdMkj26xpYQ9UgL1bbnJQXoAsHnNsi426aRibd6z4kby6J8RC2XQVVbbo35fXoY4VfukgA6TZ5hAXFf
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-PUMP_API_KEY=65m7ad3tah46ckbm8xrnaru16rqpmxhhc5272cbm8n43aubpen3k8v285dv32wk6758q0x3eatwk6rkmamrpahu4a1wmcm369dk5ehjmdth7egu4d596rha3cnq4we2e8d36cthgcwykua1d4wgvq95tmac2f61c4phaeagax53ahbc9hvngjkd912pwvu2dwrqckkae58kuf8
-AUTO_BUY_ENABLED=true
+PUMP_API_KEY=e0u6gkvp9586jhj661mqexbad4tkamkr6nmngdkd9d864jvdanu74rkh6gtn0mhja1v7abuf88vq8wa29h4nexbqc5b68uuaa4v6umbfc4v6crae8du5ehar9xvpumuk8xw4yh2ja4yku8dn50cj389x5jgk6ed9ngav78r8986yh25ax54ymbme9w4wmkaah8kcrvb9d8kuf8
+AUTO_BUY_ENABLED=false
 AUTO_BUY_AMOUNT=0.02
-AUTO_BUY_INTERVAL=30000
+AUTO_BUY_INTERVAL=60000
 TOKEN_MINT_ADDRESS=
 "@
 
 # Write to .env file
-$envContent | Set-Content -Path .env -NoNewline -Encoding UTF8
+$envContent | Set-Content -Path .env -NoNewline
 
-Write-Host "Credentials updated successfully!" -ForegroundColor Green
+Write-Host "✅ Credentials updated successfully!" -ForegroundColor Green
 Write-Host ""
-Write-Host "NEW CONFIGURATION:" -ForegroundColor Yellow
+Write-Host "📋 NEW CONFIGURATION:" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Wallet Public Key: 4BLLfDnAkZ5dk63d6GE2ShY9QEof9vrXyWZe7nTeMdH4" -ForegroundColor White
+Write-Host "Wallet Public Key:" -ForegroundColor Cyan
+Write-Host "  gsrRicZVTocSkP1R7krsHNaQikngv7DfkCZ98LpzM8M" -ForegroundColor White
 Write-Host ""
-Write-Host "Wallet Private Key: [SECURED]" -ForegroundColor Green
+Write-Host "Wallet Private Key:" -ForegroundColor Cyan
+Write-Host "  [SECURED]" -ForegroundColor Green
 Write-Host ""
-Write-Host "API Key: [CONFIGURED]" -ForegroundColor Green
+Write-Host "API Key:" -ForegroundColor Cyan
+Write-Host "  [CONFIGURED]" -ForegroundColor Green
 Write-Host ""
-Write-Host "Auto-Buy and Burn: ENABLED (0.02 SOL every 30 seconds)" -ForegroundColor Green
-Write-Host ""
-Write-Host "Next Steps:" -ForegroundColor Yellow
+Write-Host "🤖 Next Steps:" -ForegroundColor Yellow
 Write-Host "  1. Restart server: npm run dev" -ForegroundColor White
-Write-Host "  2. Ensure wallet has SOL" -ForegroundColor White
-Write-Host "  3. Monitor terminal logs" -ForegroundColor White
+Write-Host "  2. Verify credentials are loaded" -ForegroundColor White
+Write-Host "  3. Test X402 payment functionality" -ForegroundColor White
 Write-Host ""
-Write-Host "X2PAY CREDENTIALS UPDATED!" -ForegroundColor Blue
+Write-Host "X402GATE CREDENTIALS UPDATED!" -ForegroundColor Green
 Write-Host ""

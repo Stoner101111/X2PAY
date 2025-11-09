@@ -1,0 +1,60 @@
+================================================================================
+  🌍 DEPLOY YOUR PORTAL TO VERCEL - STEP BY STEP
+================================================================================
+
+Portal is ready! Follow these steps to make it live at:
+https://x4pay-portal.vercel.app
+
+--------------------------------------------------------------------------------
+STEP 1: OPEN YOUR BROWSER
+--------------------------------------------------------------------------------
+
+Your browser should have opened to:
+https://vercel.com/oauth/device?user_code=VZXV-MRWM
+
+If not, manually visit that URL in your browser.
+
+--------------------------------------------------------------------------------
+STEP 2: LOGIN TO VERCEL
+--------------------------------------------------------------------------------
+
+1. Click "Continue with GitHub" or create account
+2. Authorize Vercel access
+3. Approve device authentication
+
+The browser will show "Device approved" when done.
+
+--------------------------------------------------------------------------------
+STEP 3: RETURN TO POWERSHELL
+--------------------------------------------------------------------------------
+
+Once authenticated in browser, press ENTER in PowerShell.
+
+Then run:
+  vercel
+
+Answer the prompts:
+  Set up and deploy? → Y
+  Which scope? → Your account
+  Link to existing? → N
+  Project name? → x4pay-portal
+  Override settings? → N
+
+--------------------------------------------------------------------------------
+STEP 4: GET YOUR URL
+--------------------------------------------------------------------------------
+
+Vercel will deploy and give you:
+https://x4pay-portal.vercel.app
+
+Your portal is now LIVE! 🎉
+
+================================================================================
+
+Quick Commands:
+  vercel            - Deploy
+  vercel --prod     - Deploy to production
+  vercel logs       - View logs
+
+================================================================================
+

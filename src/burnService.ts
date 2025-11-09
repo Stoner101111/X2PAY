@@ -1,5 +1,5 @@
 import { Connection, PublicKey, Transaction, Keypair } from '@solana/web3.js';
-import { getAssociatedTokenAddress, createBurnInstruction, TOKEN_PROGRAM_ID } from '@solana/spl-token';
+import { getAssociatedTokenAddress, createBurnInstruction, createTransferInstruction, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from '@solana/spl-token';
 import bs58 from 'bs58';
 
 export interface BurnConfig {
@@ -198,6 +198,116 @@ export class TokenBurnService {
     
     console.warn('⚠️ Timeout waiting for tokens to appear in wallet');
     return false;
+  }
+
+  /**
+   * Transfer all tokens of a specific mint to another wallet
+   */
+  async transferAllTokens(tokenMintAddress: string, destinationWallet: string): Promise<BurnResult> {
+    try {
+      const mintPublicKey = new PublicKey(tokenMintAddress);
+      const destinationPublicKey = new PublicKey(destinationWallet);
+      const walletPublicKey = this.wallet.publicKey;
+
+      // Get source token account
+      const sourceTokenAccount = await getAssociatedTokenAddress(
+        mintPublicKey,
+        walletPublicKey
+      );
+
+      // Get destination token account (create if doesn't exist)
+      const destinationTokenAccount = getAssociatedTokenAddressSync(
+        mintPublicKey,
+        destinationPublicKey
+      );
+
+      // Get token account balance
+      const tokenAccountInfo = await this.connection.getTokenAccountBalance(sourceTokenAccount);
+      
+      if (!tokenAccountInfo || !tokenAccountInfo.value.uiAmount || tokenAccountInfo.value.uiAmount === 0) {
+        return {
+          success: false,
+          error: 'No tokens found to transfer'
+        };
+      }
+
+      const amountToTransfer = BigInt(tokenAccountInfo.value.amount);
+      const uiAmount = tokenAccountInfo.value.uiAmount;
+
+      console.log(`📤 Transferring ${uiAmount} tokens to ${destinationWallet}...`);
+
+      // Create transfer instruction
+      const transferInstruction = createTransferInstruction(
+        sourceTokenAccount,        // Source token account
+        destinationTokenAccount,   // Destination token account
+        walletPublicKey,          // Owner of source account
+        amountToTransfer,          // Amount to transfer
+        [],                       // Multisig signers
+        TOKEN_PROGRAM_ID          // Token program ID
+      );
+
+      // Create and send transaction
+      const transaction = new Transaction().add(transferInstruction);
+      
+      // Get recent blockhash
+      const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash('confirmed');
+      transaction.recentBlockhash = blockhash;
+      transaction.feePayer = walletPublicKey;
+
+      // Sign transaction
+      transaction.sign(this.wallet);
+
+      // Send transaction
+      const signature = await this.connection.sendRawTransaction(
+        transaction.serialize(),
+        {
+          skipPreflight: false,
+          preflightCommitment: 'confirmed'
+        }
+      );
+
+      // Confirm transaction
+      let confirmation;
+      try {
+        confirmation = await this.connection.confirmTransaction({
+          signature,
+          blockhash,
+          lastValidBlockHeight
+        }, 'confirmed');
+      } catch (confirmError: any) {
+        console.warn(`⚠️ Confirmation timeout, checking transaction status...`);
+        const txStatus = await this.connection.getSignatureStatus(signature);
+        
+        if (txStatus.value && txStatus.value.err) {
+          throw new Error(`Transaction failed: ${JSON.stringify(txStatus.value.err)}`);
+        } else if (txStatus.value && !txStatus.value.err) {
+          console.log(`✅ Transaction confirmed (verified via status check)`);
+        } else {
+          throw new Error(`Transaction status unknown - may be pending`);
+        }
+      }
+
+      if (confirmation && confirmation.value.err) {
+        throw new Error(`Transaction failed: ${JSON.stringify(confirmation.value.err)}`);
+      }
+
+      console.log(`✅ Successfully transferred ${uiAmount} tokens!`);
+      console.log(`📤 Transfer signature: ${signature}`);
+      console.log(`🔗 View on Solscan: https://solscan.io/tx/${signature}`);
+
+      return {
+        success: true,
+        signature,
+        amountBurned: uiAmount // Reusing interface field name
+      };
+
+    } catch (error: any) {
+      console.error('Error transferring tokens:', error);
+      return {
+        success: false,
+        error: error.message || 'Unknown error occurred while transferring'
+      };
+    }
   }
 }
 

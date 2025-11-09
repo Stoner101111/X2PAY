@@ -1,140 +1,472 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>x402 Payments for Machines - Complete Portal</title>
+  <title>FLINT Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;600;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070511;
-      --panel: rgba(12, 10, 24, 0.65);
-      --muted: #9aa3b2;
-      --text: #f5f7ff;
-      --accent: #7dd3fc; /* sky */
-      --accent-2: #c084fc; /* violet */
-      --ok: #34d399;
-      --warn: #fbbf24;
-      --err: #f87171;
-      --border: rgba(148,163,184,0.18);
-      --glow: 0 0 0 transparent, 0 0 26px rgba(192, 132, 252, 0.12);
+      --bg: #05060a;
+      --panel: rgba(8, 12, 20, 0.95);
+      --muted: #9fb3cc;
+      --text: #f1f5ff;
+      --accent: #4f8bff;
+      --accent-2: #82c6ff;
+      --ok: #6fd3a6;
+      --warn: #ffce6a;
+      --err: #ff4f5f;
+      --border: rgba(79, 139, 255, 0.4);
+      --glow: 0 0 0 transparent, 0 0 26px rgba(130, 198, 255, 0.4);
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0;
+      padding: 0;
+    }
+    html, body { 
+      height: 100%; 
+      overflow-x: hidden;
+    }
     body {
       margin: 0;
-      font-family: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      font-family: 'JetBrains Mono', 'Inter', 'Space Grotesk', system-ui, monospace;
       color: var(--text);
       background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      image-rendering: pixelated;
     }
-    /* full-screen image background */
+    /* full-screen dark background */
     body::before {
       content: "";
       position: fixed; inset: 0; z-index: -3;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #000000;
       filter: saturate(110%) contrast(105%);
     }
-    /* soft color wash over image */
+    /* Ember glow overlay */
     body::after {
       content: "";
       position: fixed; inset: 0; z-index: -2;
       background:
-        radial-gradient(1200px 800px at 10% -10%, rgba(192,132,252,0.16), transparent 55%),
-        radial-gradient(1000px 700px at 90% 0%, rgba(125,211,252,0.14), transparent 60%),
-        linear-gradient(180deg, rgba(7,5,17,0.35), rgba(7,5,17,0.55));
+        radial-gradient(1200px 800px at 10% -10%, rgba(79,139,255,0.12), transparent 55%),
+        radial-gradient(1000px 700px at 90% 0%, rgba(60,120,255,0.08), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,0.95), rgba(0,0,0,1));
       pointer-events: none;
+      opacity: 0.8;
+    }
+    /* Flint glow overlay */
+    body::before {
+      content: "";
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(1200px 800px at 10% -10%, rgba(79,139,255,0.12), transparent 55%),
+        radial-gradient(1000px 700px at 90% 0%, rgba(60,120,255,0.08), transparent 60%),
+        linear-gradient(180deg, rgba(0,0,0,0.95), rgba(0,0,0,1));
+      pointer-events: none;
+      opacity: 0.8;
     }
     .wrap {
       min-height: 100%;
       display: grid;
       grid-template-rows: auto 1fr auto;
     }
+    /* Flint rain canvas */
+    #flint-rain {
+      position: fixed; inset: 0; z-index: -1; display:block;
+      opacity: 0.6;
+    }
+    /* Scrolling code lines effect - flowing through portal */
+    .code-stream {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+      overflow: visible;
+      opacity: 1;
+    }
+    .code-line {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      color: #ff6b35;
+      white-space: nowrap;
+      text-shadow: 
+        0 0 15px rgba(79,139,255,1),
+        0 0 30px rgba(79,139,255,1),
+        0 0 45px rgba(79,139,255,0.8),
+        0 0 60px rgba(79,139,255,0.6);
+      animation: codeScrollThrough linear infinite;
+      opacity: 1;
+      font-weight: 600;
+      letter-spacing: 1px;
+      background: rgba(0,0,0,0.3);
+      padding: 2px 8px;
+      border-left: 2px solid rgba(79,139,255,0.5);
+    }
+    @keyframes codeScrollThrough {
+      0% {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      1% {
+        opacity: 1;
+      }
+      99% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(100vw);
+        opacity: 0;
+      }
+    }
+    /* Make panels appear in front with backdrop to see code through */
+    .panel {
+      position: relative;
+      z-index: 10;
+    }
+    .wrap {
+      position: relative;
+      z-index: 5;
+    }
+    /* Ensure code is visible through panels */
+    .panel, header, footer {
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px) saturate(150%);
+    }
     /* full-screen animated canvases */
     #galaxy {
       position: fixed; inset: 0; z-index: -1; display:block;
+      opacity: 0.3;
     }
     #swirl {
       position: fixed; inset: 0; z-index: -1; pointer-events: none; display:block;
+      opacity: 0.2;
     }
     header {
       position: sticky; top: 0;
-      backdrop-filter: saturate(140%) blur(8px);
-      background: rgba(11,13,16,0.6);
+      backdrop-filter: saturate(180%) blur(20px) brightness(0.95);
+      background: linear-gradient(180deg, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.95) 100%);
       border-bottom: 1px solid var(--border);
-      z-index: 10;
+      z-index: 100;
+      box-shadow: 
+        0 4px 32px rgba(79,139,255,0.2),
+        0 0 0 1px rgba(79,139,255,0.15) inset,
+        0 0 60px rgba(79,139,255,0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    header:hover {
+      box-shadow: 
+        0 4px 48px rgba(79,139,255,0.3),
+        0 0 0 1px rgba(79,139,255,0.25) inset,
+        0 0 80px rgba(79,139,255,0.15);
     }
     .nav {
-      max-width: 900px; margin: 0 auto; padding: 16px 20px;
-      display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+      max-width: 1200px; margin: 0 auto; padding: 20px 24px;
+      display: flex; flex-direction: row; justify-content: space-between; align-items: center; gap: 16px;
     }
     .brand {
-      display: flex; align-items: center; gap: 12px; text-decoration: none;
+      display: flex; align-items: center; gap: 16px; text-decoration: none;
       color: var(--text);
+      transition: transform 0.2s ease;
+    }
+    .brand:hover {
+      transform: translateY(-1px);
     }
     .title {
-      font-weight: 800; letter-spacing: 0.6px; font-size: 22px;
+      font-weight: 800; letter-spacing: 2px; font-size: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 12px rgba(79,139,255,0.8));
+      text-shadow: 0 0 20px rgba(79,139,255,1);
+      animation: emberGlow 2s ease-in-out infinite alternate;
     }
-    main { padding: 24px 16px; }
+    @keyframes emberGlow {
+      0% { filter: drop-shadow(0 0 12px rgba(79,139,255,0.8)); }
+      100% { filter: drop-shadow(0 0 20px rgba(60,120,255,1)); }
+    }
+    main { 
+      padding: 32px 20px; 
+      min-height: calc(100vh - 200px);
+    }
     .container {
-      max-width: 900px; margin: 0 auto;
-      display: grid; grid-template-columns: 1fr; gap: 16px;
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr; gap: 24px;
     }
     .panel {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      background: linear-gradient(135deg, 
+        rgba(0,0,0,0.7) 0%, 
+        rgba(79,139,255,0.1) 50%,
+        rgba(0,0,0,0.7) 100%);
       border: 1px solid var(--border);
-      border-radius: 14px; padding: 18px 18px 16px;
-      box-shadow: 0 0 0 transparent, 0 0 42px rgba(124,58,237,0.12);
+      border-radius: 4px; 
+      padding: 24px 24px 20px;
+      box-shadow: 
+        0 8px 32px rgba(79,139,255,0.15),
+        0 0 0 1px rgba(79,139,255,0.2) inset,
+        0 0 60px rgba(79,139,255,0.1),
+        inset 0 0 40px rgba(79,139,255,0.03);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: visible;
+      font-family: 'JetBrains Mono', monospace;
+      z-index: 10;
+      backdrop-filter: blur(8px) saturate(120%);
     }
-    .panel h2 { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--muted); }
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(79,139,255,0.8) 50%, 
+        transparent 100%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      box-shadow: 0 0 20px rgba(79,139,255,0.6);
+    }
+    .panel::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 100%;
+      background: linear-gradient(180deg, 
+        rgba(79,139,255,0.6) 0%, 
+        transparent 50%);
+      opacity: 0.3;
+    }
+    .panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 
+        0 12px 48px rgba(79,139,255,0.25),
+        0 0 0 1px rgba(79,139,255,0.3) inset,
+        0 0 80px rgba(79,139,255,0.15),
+        inset 0 0 60px rgba(79,139,255,0.05);
+      border-color: rgba(79,139,255,0.6);
+    }
+    .panel:hover::before {
+      opacity: 1;
+    }
+    .panel h2 { 
+      margin: 0 0 12px; 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: var(--accent);
+      letter-spacing: 1px;
+      text-shadow: 
+        0 0 10px rgba(79,139,255,0.6),
+        0 0 20px rgba(79,139,255,0.3);
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
     .hero {
       display: grid; grid-auto-rows: auto; gap: 12px; min-height: auto;
     }
     .hero-title {
       font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-weight: 700; font-size: 24px; letter-spacing: 0.6px;
-      display: inline-flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 32px; letter-spacing: 3px;
+      display: inline-flex; align-items: center; gap: 12px;
+      color: var(--accent);
+      text-shadow: 
+        0 0 20px rgba(79,139,255,1), 
+        0 0 40px rgba(79,139,255,0.8),
+        0 0 60px rgba(79,139,255,0.6),
+        0 0 80px rgba(60,120,255,0.4);
+      margin-bottom: 8px;
+      animation: emberTitleGlow 2s ease-in-out infinite alternate;
+      text-transform: uppercase;
     }
-    .cursor { width: 10px; height: 18px; background: linear-gradient(180deg,var(--accent),var(--accent-2)); display: inline-block; animation: blink 1s steps(1) infinite; border-radius: 2px; box-shadow: 0 0 18px rgba(124,58,237,0.45); }
-    @keyframes blink { 50% { opacity: 0; } }
-    .hero-sub { color: var(--muted); font-size: 13px; }
+    @keyframes emberTitleGlow {
+      0% { 
+        text-shadow: 
+          0 0 20px rgba(79,139,255,1), 
+          0 0 40px rgba(79,139,255,0.8),
+          0 0 60px rgba(79,139,255,0.6),
+          0 0 80px rgba(60,120,255,0.4);
+      }
+      100% { 
+        text-shadow: 
+          0 0 30px rgba(79,139,255,1), 
+          0 0 60px rgba(79,139,255,1),
+          0 0 90px rgba(79,139,255,0.8),
+          0 0 120px rgba(60,120,255,0.6);
+      }
+    }
+    .cursor { 
+      width: 12px; 
+      height: 20px; 
+      background: linear-gradient(180deg,var(--accent),var(--accent-2)); 
+      display: inline-block; 
+      animation: blink 1.2s steps(1) infinite; 
+      border-radius: 2px; 
+      box-shadow: 
+        0 0 20px rgba(79,139,255,1), 
+        0 0 40px rgba(79,139,255,0.8),
+        0 0 60px rgba(60,120,255,0.6);
+    }
+    @keyframes blink { 
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.3; }
+    }
+    .hero-sub { 
+      color: var(--muted); 
+      font-size: 15px; 
+      line-height: 1.6;
+      opacity: 0.9;
+    }
     .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    .metric { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+    .metric { background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 12px; padding: 14px; box-shadow: 0 0 15px rgba(130,198,255,0.1); }
     .metric .v { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 18px; font-weight: 700; }
     .metric .l { color: var(--muted); font-size: 12px; margin-top: 4px; }
     .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
     .btn {
-      appearance: none; border: 1px solid var(--border); color: var(--text);
-      background: rgba(255,255,255,0.06); padding: 12px 16px; border-radius: 12px;
-      font-size: 14px; font-weight: 700; letter-spacing: 0.3px; cursor: pointer; width: 100%;
-      transition: transform .12s ease, border-color .2s ease, box-shadow .2s ease;
+      appearance: none; 
+      border: 1px solid var(--border); 
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(130,198,255,0.12), rgba(100,170,255,0.08)); 
+      padding: 14px 20px; 
+      border-radius: 14px;
+      font-size: 14px; 
+      font-weight: 600; 
+      letter-spacing: 0.5px; 
+      cursor: pointer; 
+      width: 100%;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-shadow: 0 0 12px rgba(130,198,255,0.6);
+      position: relative;
+      overflow: hidden;
     }
-    .btn:hover { transform: translateY(-1px); border-color: rgba(192,132,252,0.55); box-shadow: 0 0 0 3px rgba(192,132,252,0.12) inset; }
-    .btn.primary { border-color: rgba(125,211,252,0.6); background: linear-gradient(180deg, rgba(125,211,252,0.18), rgba(125,211,252,0.06)); }
-    .footer { max-width: 1100px; margin: 0 auto; padding: 14px 20px; color: var(--muted); border-top: 1px solid var(--border); font-size: 12px; }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(130,198,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    .btn:hover::before {
+      left: 100%;
+    }
+    .btn:hover { 
+      transform: translateY(-2px) scale(1.02); 
+      border-color: rgba(130,198,255,0.9); 
+      box-shadow: 
+        0 8px 24px rgba(130,198,255,0.3),
+        0 0 0 4px rgba(130,198,255,0.15) inset,
+        0 0 32px rgba(100,170,255,0.4);
+      background: linear-gradient(135deg, rgba(130,198,255,0.18), rgba(100,170,255,0.12));
+    }
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+    .btn.primary { 
+      border-color: rgba(79,139,255,0.9); 
+      background: linear-gradient(135deg, rgba(79,139,255,0.28), rgba(60,120,255,0.15)); 
+      box-shadow: 
+        0 4px 20px rgba(79,139,255,0.4),
+        0 0 0 1px rgba(79,139,255,0.4) inset,
+        0 0 30px rgba(79,139,255,0.3);
+      text-shadow: 0 0 15px rgba(79,139,255,1);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn.primary:hover {
+      box-shadow: 
+        0 8px 32px rgba(79,139,255,0.5),
+        0 0 0 4px rgba(79,139,255,0.3) inset,
+        0 0 40px rgba(79,139,255,0.6),
+        0 0 60px rgba(60,120,255,0.4);
+    }
+    .footer { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 20px 24px; 
+      color: var(--muted); 
+      border-top: 1px solid var(--border); 
+      font-size: 13px;
+      background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
+      backdrop-filter: blur(10px);
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      text-shadow: 0 0 8px rgba(130,198,255,0.4);
+    }
+    .footer a:hover {
+      text-shadow: 0 0 12px rgba(130,198,255,0.8);
+      opacity: 0.9;
+    }
+    select.input {
+      cursor: pointer;
+    }
+    select.input option {
+      background: #000;
+      color: var(--text);
+    }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .field { display: grid; gap: 6px; }
     .label { color: var(--muted); font-size: 12px; }
     .input, .textarea {
-      width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
-      background: rgba(255,255,255,0.02); color: var(--text); outline: none;
-      font-size: 13px; font-family: Inter, system-ui;
+      width: 100%; 
+      padding: 12px 16px; 
+      border-radius: 4px; 
+      border: 1px solid var(--border);
+      background: rgba(79,139,255,0.08); 
+      color: var(--text); 
+      outline: none;
+      font-size: 14px; 
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(10px);
     }
-    .textarea { min-height: 92px; resize: vertical; }
+    .input::placeholder, .textarea::placeholder {
+      color: rgba(79,139,255,0.4);
+    }
+    .input:focus, .textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 
+        0 0 0 3px rgba(79,139,255,0.2),
+        0 0 20px rgba(79,139,255,0.3), 
+        inset 0 0 15px rgba(79,139,255,0.1),
+        0 0 40px rgba(79,139,255,0.2);
+      background: rgba(79,139,255,0.12);
+      transform: translateY(-1px);
+    }
+    .textarea { 
+      min-height: 100px; 
+      resize: vertical;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
+  <canvas id="flint-rain"></canvas>
   <canvas id="galaxy"></canvas>
   <canvas id="swirl"></canvas>
+  <div class="code-stream" id="codeStream"></div>
   <div class="wrap">
     <header>
       <div class="nav">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
           <div style="display: flex; align-items: center; gap: 16px;">
             <a class="brand" href="/">
-              <div class="title">🚀 x402 Payments for Machines</div>
+              <div class="title" style="color: var(--accent); text-shadow: 0 0 10px rgba(130,198,255,0.6);">FLINT</div>
             </a>
             <div style="font-family: 'IBM Plex Mono', monospace; font-size:12px; color:var(--muted)">tap://to/pay</div>
           </div>
@@ -145,12 +477,76 @@
     <main>
       <div class="container">
         <section class="panel hero" style="backdrop-filter: blur(4px) saturate(120%);">
-          <h1 class="hero-title">x402 Payment Portal<span class="cursor"></span></h1>
-          <div class="hero-sub">Accept USDC payments across multiple blockchains using x402 protocol. Tap to pay with Bluetooth support.</div>
+          <h1 class="hero-title">FLINT Payment Portal<span class="cursor"></span></h1>
+          <div class="hero-sub" style="color: var(--muted);">Ignite your Solana agent automations with FLINT-grade throughput.</div>
+        </section>
+
+        <section class="panel" id="autoBuyPanel" style="backdrop-filter: blur(4px) saturate(120%);">
+          <h2>FLINT: Solana Auto Buy & Burn</h2>
+          <div class="hero-sub" style="margin-bottom: 16px;">
+            Autopilot the Solana trading agent to buy and burn your token every 30 seconds using 0.01&nbsp;SOL. Connect your backend credentials and keep the wallet funded with SOL for fees.
+          </div>
+
+          <div class="row">
+            <div class="field">
+              <div class="label">Token Mint Address</div>
+              <input class="input" id="autoBuyTokenMint" type="text" placeholder="Enter token mint address" />
+            </div>
+            <div class="field">
+              <div class="label">Loop Amount (SOL)</div>
+              <input class="input" id="autoBuyAmountDisplay" type="text" value="0.01" disabled />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px;">
+            <div class="field">
+              <div class="label">Loop Interval</div>
+              <div id="autoBuyIntervalDisplay" style="font-size: 13px; color: var(--muted); padding: 12px 16px; border: 1px solid var(--border); border-radius: 4px; background: rgba(79,139,255,0.06);">
+                30 seconds
+              </div>
+            </div>
+            <div class="field">
+              <div class="label">Agent Status</div>
+              <div style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 4px; background: rgba(79,139,255,0.06);">
+                <div id="autoBuyStatusIndicator" style="width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: pulse 2s infinite;"></div>
+                <span id="autoBuyStatusText" style="font-size: 13px; color: var(--muted);">Checking status...</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 10px;">
+            <div class="field">
+              <div class="label">Next Cycle</div>
+              <div id="autoBuyNextRun" style="font-size: 13px; color: var(--muted); padding: 12px 16px; border: 1px solid var(--border); border-radius: 4px; background: rgba(79,139,255,0.06);">
+                --
+              </div>
+            </div>
+            <div class="field">
+              <div class="label">Countdown</div>
+              <div id="autoBuyCountdown" style="font-size: 20px; font-weight: 600; color: var(--accent); padding: 12px 16px; border: 1px solid var(--border); border-radius: 4px; background: rgba(79,139,255,0.12); text-align: center;">
+                --:--
+              </div>
+            </div>
+          </div>
+
+          <div class="actions" style="margin-top: 16px;">
+            <button class="btn primary" onclick="startAutoBuyLoop()">Start Loop</button>
+            <button class="btn" onclick="stopAutoBuyLoop()">Stop Loop</button>
+            <button class="btn" onclick="triggerManualBuy()">Manual Buy & Burn</button>
+            <button class="btn" onclick="updateAutoBuyToken()">Update Token Mint</button>
+          </div>
+
+          <div id="autoBuyMessages" style="margin-top: 16px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: rgba(79,139,255,0.05); font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; max-height: 160px; overflow-y: auto;">
+            <div>Waiting for agent status...</div>
+          </div>
+
+          <div style="margin-top: 12px; font-size: 11px; color: var(--muted);">
+            <strong>Prerequisites:</strong> configure <code>.env</code> with <code>SOLANA_PUBLIC_KEY</code>, <code>SOLANA_PRIVATE_KEY</code>, <code>PUMP_API_KEY</code>, <code>SOLANA_RPC_URL</code>, and <code>TOKEN_MINT_ADDRESS</code>. Optional: set <code>AUTO_BUY_ENABLED=true</code> to launch the loop automatically. Defaults run 0.01&nbsp;SOL purchases every 30 seconds.
+          </div>
         </section>
 
         <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
-          <h2>💳 Generate Payment Requirements</h2>
+          <h2>FLINT: Generate Payment Requirements</h2>
           <div class="hero-sub" style="margin-bottom: 16px;">
             Create payment requirements for accepting x402 payments. Configure network, amount, and recipient address.
           </div>
@@ -187,14 +583,14 @@
             <button class="btn primary" onclick="generatePaymentRequirements()">Generate Payment Requirements</button>
             <button class="btn" onclick="clearX402Form()">Clear Form</button>
           </div>
-          <div id="x402Result" style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; display: none;">
+          <div id="x402Result" style="margin-top: 16px; padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 10px; display: none; box-shadow: 0 0 15px rgba(130,198,255,0.1);">
             <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--accent);">Payment Requirements JSON</h3>
             <pre id="x402RequirementsJson" style="margin: 0; padding: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); overflow-x: auto; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: 6px;"></pre>
           </div>
         </section>
 
         <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
-          <h2>📡 Tap-to-Pay Scanner (Web Bluetooth)</h2>
+          <h2>FLINT: Tap-to-Pay Scanner (Web Bluetooth)</h2>
           <div class="hero-sub" style="margin-bottom: 16px;">
             Connect to nearby x402 payment devices via Bluetooth Low Energy (BLE). Perfect for IoT devices, vending machines, and physical payment terminals.
           </div>
@@ -206,12 +602,12 @@
             </div>
             
             <button class="btn primary" onclick="scanBluetoothDevices()" id="scanBtn">
-              <span style="margin-right: 8px;">⊕</span>
+              <span style="margin-right: 8px;">âŠ•</span>
               Scan for Devices
             </button>
           </div>
 
-          <div id="bleDeviceInfo" style="display: none; margin-top: 16px; padding: 12px; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2); border-radius: 10px;">
+          <div id="bleDeviceInfo" style="display: none; margin-top: 16px; padding: 12px; background: rgba(130,198,255,0.12); border: 1px solid rgba(130,198,255,0.4); border-radius: 10px; box-shadow: 0 0 20px rgba(130,198,255,0.2);">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
               <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--ok);"></div>
               <strong style="font-size: 13px;">Connected Device</strong>
@@ -224,30 +620,112 @@
             <div id="devicePaymentInfo" style="margin-top: 8px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent);"></div>
           </div>
 
-          <div style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; font-size: 11px; color: var(--muted);">
+          <div style="margin-top: 16px; padding: 12px; background: rgba(130,198,255,0.05); border: 1px solid var(--border); border-radius: 10px; font-size: 11px; color: var(--muted);">
             <strong>Note:</strong> Web Bluetooth API requires HTTPS or localhost. Compatible with Chrome, Edge, or Opera. Make sure your x402 device is discoverable and in range.
           </div>
         </section>
 
         <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
-          <h2>📊 Network Information</h2>
+          <h2>FLINT: AI Agent Core - Autonomous Operations</h2>
+          <div class="hero-sub" style="margin-bottom: 16px;">
+            Interact with the autonomous AI agent. Capabilities: Speak, Think, Remember, Post, and Build. Armed with tools and flows to accelerate AI dominance.
+          </div>
+          
+          <div id="agentStatus" style="margin-bottom: 16px; padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 0 15px rgba(130,198,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <div id="agentStatusIndicator" style="width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: pulse 2s infinite;"></div>
+              <strong style="font-size: 13px; color: var(--accent);">Agent Status: <span id="agentStatusText">ACTIVE</span></strong>
+            </div>
+            <div id="agentStats" style="font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; margin-top: 8px;">
+              Loading agent statistics...
+            </div>
+          </div>
+
+          <!-- Chat Interface -->
+          <div style="margin-bottom: 24px; border: 1px solid var(--border); border-radius: 16px; background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(130,198,255,0.02)); max-height: 450px; display: flex; flex-direction: column; box-shadow: 0 4px 24px rgba(130,198,255,0.1), inset 0 0 40px rgba(100,170,255,0.05); backdrop-filter: blur(10px);">
+            <div style="padding: 16px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(130,198,255,0.08), transparent);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: pulse 2s infinite;"></div>
+                <strong style="font-size: 13px; color: var(--accent); font-weight: 600; letter-spacing: 0.5px;">Agent Conversation</strong>
+              </div>
+            </div>
+            <div id="agentChat" style="flex: 1; padding: 16px; overflow-y: auto; max-height: 320px; font-size: 12px; font-family: 'Inter', system-ui; line-height: 1.6;">
+              <div style="color: var(--muted); margin-bottom: 12px; padding: 10px 12px; background: rgba(130,198,255,0.06); border-radius: 10px; border-left: 2px solid var(--accent); animation: fadeIn 0.3s ease;">Agent: Hello! I'm an autonomous AI agent with 5 core capabilities.</div>
+              <div style="color: var(--muted); margin-bottom: 12px; padding: 10px 12px; background: rgba(130,198,255,0.06); border-radius: 10px; border-left: 2px solid var(--accent); animation: fadeIn 0.4s ease;">Agent: I can Speak, Think, Remember, Post, and Build.</div>
+              <div style="color: var(--muted); margin-bottom: 12px; padding: 10px 12px; background: rgba(130,198,255,0.06); border-radius: 10px; border-left: 2px solid var(--accent); animation: fadeIn 0.5s ease;">User: What's your current status?</div>
+              <div style="color: var(--muted); margin-bottom: 12px; padding: 10px 12px; background: rgba(130,198,255,0.06); border-radius: 10px; border-left: 2px solid var(--accent); animation: fadeIn 0.6s ease;">Agent: I'm online and ready to assist with payments, trading loops, or automations.</div>
+              <div style="color: rgba(130,198,255,0.6); font-style: italic; padding: 8px 12px;">Type a message to interact with me...</div>
+            </div>
+            <div style="padding: 16px; border-top: 1px solid var(--border); background: linear-gradient(90deg, rgba(130,198,255,0.05), transparent); display: flex; gap: 12px;">
+              <input type="text" id="chatInput" placeholder="Type your message..." class="input" style="flex: 1; margin: 0; font-size: 13px;" onkeypress="if(event.key==='Enter') sendChatMessage()">
+              <button class="btn primary" onclick="sendChatMessage()" style="width: auto; padding: 12px 24px; min-width: 100px;">Send</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 16px;">
+            <div class="row">
+              <div class="field">
+                <div class="label">Agent Capability</div>
+                <select class="input" id="agentCapability">
+                  <option value="think">THINK - AI Reasoning</option>
+                  <option value="speak">SPEAK - Text-to-Speech</option>
+                  <option value="remember">REMEMBER - Memory</option>
+                  <option value="post">POST - Social Media</option>
+                  <option value="build">BUILD - Creation Tools</option>
+                </select>
+              </div>
+              <div class="field">
+                <div class="label">Platform (for POST)</div>
+                <select class="input" id="agentPlatform">
+                  <option value="twitter">Twitter</option>
+                  <option value="discord">Discord</option>
+                  <option value="telegram">Telegram</option>
+                  <option value="reddit">Reddit</option>
+                </select>
+              </div>
+            </div>
+            <div class="field" style="margin-top: 10px;">
+              <div class="label">Input / Prompt</div>
+              <textarea class="textarea" id="agentInput" placeholder="Enter your prompt or request for the AI agent..."></textarea>
+            </div>
+            <div class="actions" style="margin-top: 16px;">
+              <button class="btn primary" onclick="executeAgentAction()">
+                <span style="margin-right: 8px;">âš¡</span>
+                Execute Agent Action
+              </button>
+              <button class="btn" onclick="clearAgentInput()">Clear</button>
+            </div>
+          </div>
+
+          <div id="agentResult" style="margin-top: 16px; padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 10px; display: none; box-shadow: 0 0 15px rgba(130,198,255,0.1);">
+            <h3 style="font-size: 13px; font-weight: 600; margin: 0 0 8px; color: var(--accent);">Agent Response</h3>
+            <div id="agentResultContent" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+          </div>
+
+          <div style="margin-top: 16px; padding: 12px; background: rgba(130,198,255,0.05); border: 1px solid var(--border); border-radius: 10px; font-size: 11px; color: var(--muted);">
+            <strong>Note:</strong> All AI agent actions require x402 payment ($0.50 USDC). Connect your wallet to interact with the agent.
+          </div>
+        </section>
+
+        <section class="panel" style="backdrop-filter: blur(4px) saturate(120%);">
+          <h2>FLINT: Network Information</h2>
           <div class="hero-sub" style="margin-bottom: 16px;">
             Supported networks and their USDC contract addresses for x402 payments.
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 0 10px rgba(130,198,255,0.1);">
               <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Base Sepolia</div>
               <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0x036CbD...</div>
             </div>
-            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 0 10px rgba(130,198,255,0.1);">
               <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Base</div>
               <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0x833589fC...</div>
             </div>
-            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 0 10px rgba(130,198,255,0.1);">
               <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Avalanche</div>
               <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0xB97EF9Ef...</div>
             </div>
-            <div style="padding: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 8px;">
+            <div style="padding: 12px; background: rgba(130,198,255,0.08); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 0 10px rgba(130,198,255,0.1);">
               <div style="font-weight: 600; color: var(--accent); font-size: 13px;">Polygon</div>
               <div style="font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; word-break: break-all;">0x3c499c5...</div>
             </div>
@@ -258,7 +736,7 @@
 
     <footer class="footer">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span>x402 Payments for Machines</span>
+        <span style="color: var(--accent);">FLINT</span>
         <span style="font-size: 11px; color: var(--muted);">
           Powered by <a href="https://x402.org" target="_blank" style="color: var(--accent); text-decoration: none;">x402 Protocol</a> & 
           <a href="https://github.com/AbhinavBuilds/x4-pay-core" target="_blank" style="color: var(--accent); text-decoration: none;">x4-pay-core</a>
@@ -296,11 +774,11 @@
         const d = await r.json();
         if (d.success && d.requirements) {
           document.getElementById('x402RequirementsJson').textContent = JSON.stringify(d.requirements, null, 2);
-          alert('✅ Payment requirements generated successfully!');
+          alert('âœ… Payment requirements generated successfully!');
         }
       } catch (e) {
         // API not available, use local version
-        alert('✅ Payment requirements generated (local mode)!');
+        alert('âœ… Payment requirements generated (local mode)!');
       }
     }
 
@@ -379,7 +857,7 @@
 
       const btn = document.getElementById('scanBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span style="margin-right: 8px;">⟳</span> Scanning...';
+      btn.innerHTML = '<span style="margin-right: 8px;">âŸ³</span> Scanning...';
 
       try {
         const device = await navigator.bluetooth.requestDevice({
@@ -425,7 +903,7 @@
         }
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<span style="margin-right: 8px;">⊕</span> Scan for Devices';
+        btn.innerHTML = '<span style="margin-right: 8px;">âŠ•</span> Scan for Devices';
       }
     }
 
@@ -473,7 +951,7 @@
           Price: ${data.price} USDC<br>
           Pay To: ${data.payTo.substring(0,20)}...
         `;
-        alert('💳 Payment request received: ' + data.price + ' USDC on ' + data.network);
+        alert('Payment request received: ' + data.price + ' USDC on ' + data.network);
       } else if (text.startsWith('LOGO://')) {
         console.log('Logo:', text.slice(7));
       } else if (text.startsWith('BANNER://')) {
@@ -487,7 +965,7 @@
       } else if (text.startsWith('PAYMENT:COMPLETE')) {
         const txHash = text.split('TX:')[1]?.split(' ')[0];
         console.log('Payment complete:', text);
-        alert('✅ Payment completed successfully!\nTransaction: ' + txHash);
+        alert('Payment completed successfully!\nTransaction: ' + txHash);
       }
     }
 
@@ -516,19 +994,20 @@
           vx: Math.cos(angle)*speed,
           vy: Math.sin(angle)*speed,
           r: Math.random()*1.6 + 0.3,
-          hue: 200 + Math.random()*160
+          hue: 25 + Math.random()*20 // Ember range (25-45)
         };
       }
       window.addEventListener('resize', resize); resize();
       function tick(){
-        ctx.fillStyle = `rgba(7,5,17,${tail})`;
+        ctx.fillStyle = `rgba(0,0,0,${tail})`;
         ctx.fillRect(0,0,w,h);
         for (let i=0;i<stars.length;i++){
           const s = stars[i];
           s.x += s.vx; s.y += s.vy;
           if (s.x < -20 || s.x > w+20 || s.y < -20 || s.y > h+20){ stars[i] = spawn(); continue; }
           const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r*6);
-          grad.addColorStop(0, `hsla(${s.hue},100%,80%,0.95)`);
+          // Ember hues (25-35 hue range)
+          grad.addColorStop(0, `hsla(25 + ${Math.random()*10},100%,60%,0.8)`);
           grad.addColorStop(1, 'hsla(0,0%,0%,0)');
           ctx.fillStyle = grad;
           ctx.beginPath();
@@ -568,20 +1047,666 @@
       function tick(){
         ctx.clearRect(0,0,w,h);
         const g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,Math.min(w,h)/2);
-        g.addColorStop(0,'rgba(255,255,255,0.06)');
-        g.addColorStop(1,'rgba(255,255,255,0)');
+        g.addColorStop(0,'rgba(79,139,255,0.06)');
+        g.addColorStop(1,'rgba(79,139,255,0)');
         ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-        arm(0, 'rgba(125,211,252,0.45)');
-        arm(Math.PI, 'rgba(192,132,252,0.45)');
+        arm(0, 'rgba(79,139,255,0.3)');
+        arm(Math.PI, 'rgba(60,120,255,0.3)');
         t+=1;
         requestAnimationFrame(tick);
       }
       tick();
     })();
 
+    // Ember Rain Effect
+    (function initFlintRain(){
+      const canvas = document.getElementById('flint-rain');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h;
+      
+      // Ember glyph set
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?';
+      const fontSize = 14;
+      let columns = [];
+      let drops = [];
+      
+      function resize(){
+        w = canvas.width = window.innerWidth || document.documentElement.clientWidth;
+        h = canvas.height = window.innerHeight || document.documentElement.clientHeight;
+        columns = Math.floor(w / fontSize);
+        drops = new Array(columns).fill(1);
+      }
+      
+      window.addEventListener('resize', resize);
+      resize();
+      
+      function draw(){
+        // Semi-transparent black background for trailing effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillRect(0, 0, w, h);
+        
+        // Ember orange color
+        ctx.fillStyle = '#ff6b35';
+        ctx.font = fontSize + 'px monospace';
+        
+        for(let i = 0; i < drops.length; i++){
+          // Random character
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          
+          // Draw character with varying opacity for depth effect
+          const opacity = Math.random() > 0.98 ? 1 : 0.4;
+          ctx.globalAlpha = opacity;
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          
+          // Reset drop to top randomly after it has passed
+          if(drops[i] * fontSize > h && Math.random() > 0.975){
+            drops[i] = 0;
+          }
+          
+          // Move drop down
+          drops[i]++;
+        }
+        
+        ctx.globalAlpha = 1;
+      }
+      
+      setInterval(draw, 35);
+    })();
+
+    // Scrolling Code Lines Effect
+    (function initCodeStream(){
+      const codeStream = document.getElementById('codeStream');
+      if (!codeStream) return;
+      
+      const codeSnippets = [
+        'const x402 = require("x402-payments");',
+        'payment.verify().then(settle);',
+        'function monetize(service) { return x402.charge(0.50); }',
+        'POST /api/ai/think { "prompt": "...", "paymentPayload": {...} }',
+        'agent.remember(context, tags, importance);',
+        'await agent.build("api", "Create authentication endpoint");',
+        'x402.protocol.verifyPayment(requirements);',
+        'const agent = new AICore({ speak, think, remember, post, build });',
+        'monetizationAgent.registerService("ai-agent-core", { price: 0.50 });',
+        'payment.amount = 0.50; payment.network = "base";',
+        'if (payment.verified) { deliverService(); }',
+        'agent.post("Twitter", "AI Agent is live!");',
+        'const memory = agent.recall(["preferences", "ui"]);',
+        'await agent.speak("Hello, I am an autonomous AI agent");',
+        'const thought = agent.think("What should I build next?");',
+        'x402.payTo("0x...", 0.50, "base");',
+        'const requirements = x402.getPaymentRequirements();',
+        'agent.capabilities = ["speak", "think", "remember", "post", "build"];',
+        'monetizationAgent.createPaymentMiddleware(serviceId);',
+        'x402.settle(paymentId).then(confirm);',
+        'const stats = agent.getStats();',
+        'payment.network = "base-sepolia";',
+        'agent.execute("think", { prompt, context });',
+        'const buildTask = agent.build("code", description);',
+        'x402.verify(paymentPayload).then(proceed);',
+        'agent.memories.search("theme").then(recall);',
+        'POST /api/monetization/services/ai-agent-core/payment-requirements',
+        'const wallet = new WalletAdapter(provider);',
+        'agent.remember("User prefers dark theme", ["ui"], 9);',
+        'x402.protocol.handlePayment(requirements);'
+      ];
+      
+      function createCodeLine() {
+        const line = document.createElement('div');
+        line.className = 'code-line';
+        line.textContent = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+        
+        // Random vertical position - spread across entire viewport including through panels
+        const top = 5 + Math.random() * 90; // Use full viewport height
+        line.style.top = top + '%';
+        
+        // Faster animation duration (8-18 seconds for dynamic flow)
+        const duration = 8 + Math.random() * 10;
+        line.style.animationDuration = duration + 's';
+        
+        // Random delay for staggered appearance
+        const delay = Math.random() * 2;
+        line.style.animationDelay = delay + 's';
+        
+        // Maximum visibility
+        line.style.opacity = 1;
+        
+        // Strong glow
+        line.style.filter = `drop-shadow(0 0 15px rgba(79,139,255,1)) drop-shadow(0 0 30px rgba(79,139,255,0.8))`;
+        
+        codeStream.appendChild(line);
+        
+        // Remove after animation completes
+        setTimeout(() => {
+          if (line.parentNode) {
+            line.parentNode.removeChild(line);
+          }
+        }, (duration + delay) * 1000);
+      }
+      
+      // Create initial code lines immediately - more lines for continuous flow
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => createCodeLine(), i * 800);
+      }
+      
+      // Continuously create new code lines - very frequent for smooth flow
+      setInterval(() => {
+        if (codeStream.children.length < 25) {
+          createCodeLine();
+        }
+      }, 1200);
+      
+      // Debug: Log when code lines are created
+      console.log('Code stream initialized - creating code lines');
+      console.log('Code stream element:', codeStream);
+      console.log('Code stream parent:', codeStream.parentElement);
+      
+      // Test: Create a visible test line immediately
+      setTimeout(() => {
+        const testLine = document.createElement('div');
+        testLine.className = 'code-line';
+        testLine.textContent = 'TEST: Code stream is working!';
+        testLine.style.top = '50%';
+        testLine.style.animationDuration = '5s';
+        testLine.style.animationDelay = '0s';
+        testLine.style.opacity = '1';
+        testLine.style.zIndex = '999';
+        codeStream.appendChild(testLine);
+        console.log('Test line created:', testLine);
+        
+        setTimeout(() => {
+          if (testLine.parentNode) {
+            testLine.parentNode.removeChild(testLine);
+          }
+        }, 6000);
+      }, 1000);
+    })();
+
     // Check if Web Bluetooth is supported
     if (!navigator.bluetooth) {
       console.warn('Web Bluetooth not supported in this browser');
+    }
+
+    // ============================================
+    // AI AGENT FUNCTIONS
+    // ============================================
+
+    // Load agent statistics on page load
+    async function loadAgentStats() {
+      try {
+        const response = await fetch('/api/ai/stats');
+        const data = await response.json();
+        
+        if (data.success && data.stats) {
+          const stats = data.stats;
+          document.getElementById('agentStats').innerHTML = `
+            Memories: ${stats.memories} | 
+            Thoughts: ${stats.thoughts} | 
+            Posts: ${stats.posts} | 
+            Build Tasks: ${stats.buildTasks}
+          `;
+        }
+      } catch (error) {
+        console.error('Failed to load agent stats:', error);
+        document.getElementById('agentStats').textContent = 'Stats unavailable';
+      }
+    }
+
+    // Execute agent action
+    async function executeAgentAction() {
+      const capability = document.getElementById('agentCapability').value;
+      const input = document.getElementById('agentInput').value.trim();
+      const platform = document.getElementById('agentPlatform').value;
+
+      if (!input) {
+        alert('Please enter input for the agent');
+        return;
+      }
+
+      const resultDiv = document.getElementById('agentResult');
+      const resultContent = document.getElementById('agentResultContent');
+      resultDiv.style.display = 'block';
+      resultContent.textContent = 'Processing... Please connect wallet and make payment.';
+
+      try {
+        // First, get payment requirements
+        const requirementsResponse = await fetch('/api/monetization/services/ai-agent-core/payment-requirements');
+        const requirementsData = await requirementsResponse.json();
+
+        if (!requirementsData.success) {
+          resultContent.textContent = 'Error: Could not get payment requirements';
+          return;
+        }
+
+        resultContent.textContent = 'Payment required. Please connect wallet to proceed.\n\nPayment Requirements:\n' + JSON.stringify(requirementsData.requirements, null, 2);
+
+        // Check if wallet is available
+        if (typeof window.ethereum === 'undefined') {
+          resultContent.textContent += '\n\nâš ï¸ No wallet detected. Please install MetaMask or Coinbase Wallet.';
+          return;
+        }
+
+        // For now, show instructions
+        resultContent.textContent = `To execute "${capability}" action:\n\n` +
+          `1. Get payment requirements: GET /api/monetization/services/ai-agent-core/payment-requirements\n` +
+          `2. Create payment with wallet\n` +
+          `3. POST to /api/ai/${capability} with paymentPayload\n\n` +
+          `Input: ${input}\n` +
+          `Platform: ${platform}\n\n` +
+          `API Endpoint: POST /api/ai/${capability}`;
+
+        // Try to execute if wallet is connected
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          if (accounts.length > 0) {
+            resultContent.textContent += '\n\nâœ… Wallet connected. Payment integration coming soon...';
+          }
+        } catch (e) {
+          // Wallet not connected
+        }
+
+      } catch (error) {
+        resultContent.textContent = 'Error: ' + error.message;
+        console.error('Agent action error:', error);
+      }
+    }
+
+    function clearAgentInput() {
+      document.getElementById('agentInput').value = '';
+      document.getElementById('agentResult').style.display = 'none';
+    }
+
+    // Update agent status indicator
+    function updateAgentStatus() {
+      const indicator = document.getElementById('agentStatusIndicator');
+      const statusText = document.getElementById('agentStatusText');
+      
+      // Check if agent is active
+      fetch('/api/ai/stats')
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            indicator.style.background = 'var(--ok)';
+            statusText.textContent = 'ACTIVE';
+          }
+        })
+        .catch(() => {
+          indicator.style.background = 'var(--muted)';
+          statusText.textContent = 'CHECKING...';
+        });
+    }
+
+    // Chat interface
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addChatMessage(`You: ${message}`, true);
+      
+      // Clear input
+      input.value = '';
+      
+      // Simulate agent thinking
+      const thinkingMsg = addChatMessage('Agent: Thinking...', false);
+      thinkingMsg.style.fontStyle = 'italic';
+      thinkingMsg.style.opacity = '0.7';
+
+      // Process message based on content
+      setTimeout(() => {
+        thinkingMsg.remove();
+        const response = processChatMessage(message);
+        addChatMessage(`Agent: ${response}`, false);
+      }, 1200);
+    }
+
+    function processChatMessage(message) {
+      const lower = message.toLowerCase();
+      
+      if (lower.includes('think') || lower.includes('analyze') || lower.includes('reason')) {
+        return 'I can use my THINK capability to analyze that. Would you like me to process it?';
+      } else if (lower.includes('remember') || lower.includes('save') || lower.includes('store')) {
+        return 'I can REMEMBER that information for you. Should I store it?';
+      } else if (lower.includes('post') || lower.includes('tweet') || lower.includes('social')) {
+        return 'I can POST to social media platforms. Which platform would you like?';
+      } else if (lower.includes('build') || lower.includes('create') || lower.includes('make')) {
+        return 'I can BUILD that for you. What would you like me to create?';
+      } else if (lower.includes('speak') || lower.includes('voice') || lower.includes('audio')) {
+        return 'I can SPEAK using text-to-speech. What should I say?';
+      } else if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+        return 'Hello! I\'m an autonomous AI agent. I can Speak, Think, Remember, Post, and Build. How can I help you accelerate AI dominance?';
+      } else if (lower.includes('capabilities') || lower.includes('what can you')) {
+        return 'My 5 core capabilities:\n1. SPEAK - Text-to-speech\n2. THINK - AI reasoning\n3. REMEMBER - Persistent memory\n4. POST - Social media\n5. BUILD - Creation tools';
+      } else {
+        return 'I can help with that! Use my capabilities: THINK for analysis, REMEMBER to store info, POST for social media, BUILD for creation, or SPEAK for voice output.';
+      }
+    }
+
+    // ============================================
+    // SOLANA AUTO BUY LOOP PANEL
+    // ============================================
+    const autoBuyState = {
+      countdownTimer: null,
+      pollTimer: null,
+      lastStatus: null,
+      awaitingNotification: false
+    };
+
+    const AUTO_BUY_POLL_INTERVAL = 7000;
+
+    function appendAutoBuyMessage(message, level = 'info') {
+      const container = document.getElementById('autoBuyMessages');
+      if (!container) return;
+
+      const entry = document.createElement('div');
+      entry.style.marginBottom = '6px';
+
+      const colors = {
+        info: 'var(--muted)',
+        success: 'var(--accent)',
+        warn: 'var(--warn)',
+        error: 'var(--err)'
+      };
+
+      entry.style.color = colors[level] || colors.info;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      container.appendChild(entry);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function formatTimestamp(ms) {
+      if (!ms) return '--';
+      const date = new Date(ms);
+      if (Number.isNaN(date.getTime())) return '--';
+      return date.toLocaleString();
+    }
+
+    function updateAutoBuyUI(status) {
+      const indicator = document.getElementById('autoBuyStatusIndicator');
+      const statusText = document.getElementById('autoBuyStatusText');
+      const amountDisplay = document.getElementById('autoBuyAmountDisplay');
+      const intervalDisplay = document.getElementById('autoBuyIntervalDisplay');
+      const nextRunDisplay = document.getElementById('autoBuyNextRun');
+      const tokenInput = document.getElementById('autoBuyTokenMint');
+
+      autoBuyState.lastStatus = status || null;
+      autoBuyState.awaitingNotification = false;
+
+      if (indicator && statusText) {
+        if (status?.running) {
+          indicator.style.background = 'var(--ok)';
+          statusText.textContent = 'Running auto buy & burn loop';
+        } else if (status?.enabled) {
+          indicator.style.background = 'var(--warn)';
+          statusText.textContent = 'Idle (enabled but not running)';
+        } else {
+          indicator.style.background = 'var(--muted)';
+          statusText.textContent = 'Disabled (AUTO_BUY_ENABLED=false)';
+        }
+      }
+
+      if (amountDisplay && typeof status?.amount === 'number') {
+        amountDisplay.value = Number(status.amount).toFixed(4);
+      }
+
+      if (intervalDisplay && typeof status?.intervalSeconds === 'number') {
+        intervalDisplay.textContent = `${status.intervalSeconds} seconds`;
+      }
+
+      if (nextRunDisplay) {
+        nextRunDisplay.textContent = status?.running && status.nextBuyTime
+          ? formatTimestamp(status.nextBuyTime)
+          : '--';
+      }
+
+      if (tokenInput && status) {
+        if (!tokenInput.value && status.tokenMintAddress) {
+          tokenInput.value = status.tokenMintAddress;
+        }
+        tokenInput.placeholder = status.tokenMintAddress || 'Enter token mint address';
+      }
+
+      scheduleAutoBuyCountdown();
+    }
+
+    function scheduleAutoBuyCountdown() {
+      if (autoBuyState.countdownTimer) {
+        clearInterval(autoBuyState.countdownTimer);
+      }
+      updateAutoBuyCountdown();
+      autoBuyState.countdownTimer = setInterval(updateAutoBuyCountdown, 1000);
+    }
+
+    function updateAutoBuyCountdown() {
+      const countdownDisplay = document.getElementById('autoBuyCountdown');
+      if (!countdownDisplay) return;
+
+      const status = autoBuyState.lastStatus;
+      if (!status || !status.running || !status.nextBuyTime) {
+        countdownDisplay.textContent = '--:--';
+        autoBuyState.awaitingNotification = false;
+        return;
+      }
+
+      const now = Date.now();
+      const diff = Math.max(0, status.nextBuyTime - now);
+      const totalSeconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      countdownDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (diff === 0 && !autoBuyState.awaitingNotification) {
+        autoBuyState.awaitingNotification = true;
+        appendAutoBuyMessage('Waiting for the next buy & burn confirmation...', 'info');
+      }
+
+      if (diff > 0) {
+        autoBuyState.awaitingNotification = false;
+      }
+    }
+
+    async function fetchAutoBuyStatus(silent = false) {
+      try {
+        const response = await fetch('/api/auto-buy/status');
+        const data = await response.json();
+
+        if (data.success && data.data) {
+          updateAutoBuyUI(data.data);
+          if (!silent) {
+            appendAutoBuyMessage('Status updated.', 'success');
+          }
+        } else if (!silent) {
+          appendAutoBuyMessage(data.error || 'Failed to load status.', 'error');
+        }
+      } catch (error) {
+        if (!silent) {
+          appendAutoBuyMessage(`Status error: ${error.message}`, 'error');
+        }
+      }
+    }
+
+    function startAutoBuyPolling() {
+      if (autoBuyState.pollTimer) {
+        clearInterval(autoBuyState.pollTimer);
+      }
+      autoBuyState.pollTimer = setInterval(() => fetchAutoBuyStatus(true), AUTO_BUY_POLL_INTERVAL);
+    }
+
+    async function startAutoBuyLoop() {
+      appendAutoBuyMessage('Starting auto buy & burn loop...', 'info');
+      try {
+        const response = await fetch('/api/auto-buy/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          appendAutoBuyMessage(data.message || 'Loop started.', 'success');
+          fetchAutoBuyStatus(true);
+        } else {
+          appendAutoBuyMessage(data.error || data.message || 'Unable to start loop.', 'error');
+        }
+      } catch (error) {
+        appendAutoBuyMessage(`Start failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function stopAutoBuyLoop() {
+      appendAutoBuyMessage('Stopping auto buy & burn loop...', 'info');
+      try {
+        const response = await fetch('/api/auto-buy/stop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          appendAutoBuyMessage(data.message || 'Loop stopped.', 'warn');
+          fetchAutoBuyStatus(true);
+        } else {
+          appendAutoBuyMessage(data.error || data.message || 'Unable to stop loop.', 'error');
+        }
+      } catch (error) {
+        appendAutoBuyMessage(`Stop failed: ${error.message}`, 'error');
+      }
+    }
+
+    async function triggerManualBuy() {
+      appendAutoBuyMessage('Triggering manual buy & burn...', 'info');
+      try {
+        const response = await fetch('/api/auto-buy/manual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          appendAutoBuyMessage(data.message || 'Manual buy executed.', 'success');
+          fetchAutoBuyStatus(true);
+        } else {
+          appendAutoBuyMessage(data.error || 'Manual buy failed.', 'error');
+        }
+      } catch (error) {
+        appendAutoBuyMessage(`Manual buy error: ${error.message}`, 'error');
+      }
+    }
+
+    async function updateAutoBuyToken() {
+      const tokenInput = document.getElementById('autoBuyTokenMint');
+      const tokenMintAddress = tokenInput?.value.trim();
+
+      if (!tokenMintAddress) {
+        appendAutoBuyMessage('Enter a token mint address before updating.', 'warn');
+        return;
+      }
+
+      appendAutoBuyMessage(`Updating token mint to ${tokenMintAddress}...`, 'info');
+
+      try {
+        const response = await fetch('/api/auto-buy/update-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tokenMintAddress })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          appendAutoBuyMessage('Token mint updated successfully.', 'success');
+          fetchAutoBuyStatus(true);
+        } else {
+          appendAutoBuyMessage(data.error || 'Token mint update failed.', 'error');
+        }
+      } catch (error) {
+        appendAutoBuyMessage(`Token update error: ${error.message}`, 'error');
+      }
+    }
+
+    function initAutoBuyPanel() {
+      // Only initialize if panel exists on page
+      if (!document.getElementById('autoBuyPanel')) {
+        return;
+      }
+      fetchAutoBuyStatus(true);
+      startAutoBuyPolling();
+    }
+
+    // Load stats on page load
+    initAutoBuyPanel();
+    loadAgentStats();
+    updateAgentStatus();
+    setInterval(updateAgentStatus, 30000); // Update every 30 seconds
+    setInterval(loadAgentStats, 60000); // Reload stats every minute
+
+    // Add pulse animation for status indicator
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.2); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      #agentChat::-webkit-scrollbar {
+        width: 8px;
+      }
+      #agentChat::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.3);
+        border-radius: 4px;
+      }
+      #agentChat::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      #agentChat::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+        box-shadow: 0 0 8px rgba(130,198,255,0.5);
+      }
+      .panel {
+        animation: panelFadeIn 0.6s ease-out;
+      }
+      @keyframes panelFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .panel:nth-child(1) { animation-delay: 0.1s; }
+      .panel:nth-child(2) { animation-delay: 0.2s; }
+      .panel:nth-child(3) { animation-delay: 0.3s; }
+      .panel:nth-child(4) { animation-delay: 0.4s; }
+      .panel:nth-child(5) { animation-delay: 0.5s; }
+    `;
+    document.head.appendChild(style);
+    
+    // Add fade-in animation to chat messages
+    function addChatMessage(text, isUser = false) {
+      const chatDiv = document.getElementById('agentChat');
+      const msg = document.createElement('div');
+      msg.style.cssText = `
+        color: ${isUser ? 'var(--accent)' : 'var(--muted)'}; 
+        margin-bottom: 12px; 
+        padding: 10px 12px; 
+        background: ${isUser ? 'rgba(130,198,255,0.1)' : 'rgba(130,198,255,0.06)'}; 
+        border-radius: 10px; 
+        border-left: 2px solid var(--accent);
+        text-align: ${isUser ? 'right' : 'left'};
+        animation: fadeIn 0.3s ease;
+      `;
+      msg.textContent = text;
+      chatDiv.appendChild(msg);
+      chatDiv.scrollTop = chatDiv.scrollHeight;
+      return msg;
     }
   </script>
 </body>
